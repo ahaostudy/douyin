@@ -1,4 +1,4 @@
-package middleware
+package cors
 
 import (
 	"github.com/gin-gonic/gin"

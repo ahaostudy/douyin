@@ -5,3 +5,9 @@ mysql:
   username: root
   password: xxx
   charset: utf8mb4
+
+jwt:
+  expire_duration: 3600
+  issuer: 'henhenzhuanyibi'
+  subject: 'douyin'
+  key: 'douyin-tiktok'
