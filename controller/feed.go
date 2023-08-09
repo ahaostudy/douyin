@@ -5,9 +5,9 @@ import (
 )
 
 func Feed(c *gin.Context) {
-  c.JSON(200, gin.H{
-    "code": 200,
-    "msg": "sccuess",
-    "data": "hello",
-  })
+	c.JSON(200, gin.H{
+		"code": 200,
+		"msg":  "success",
+		"data": "hello",
+	})
 }

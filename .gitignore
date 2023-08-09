@@ -1,6 +1,9 @@
 .git/
+.1024
 .1024.nix
 .1024nix
 .1024feature*
 .nfs*
+.idea
 node_modules
+config/config.yaml

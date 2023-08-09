@@ -1,11 +1,22 @@
 package main
 
-import "main/router"
+import (
+	"main/config"
+	"main/dao"
+	"main/router"
+)
 
 func main() {
-  r := router.InitRouter()
+	if err := config.InitConfig(); err != nil {
+		panic(err)
+	}
 
-  if err := r.Run(); err != nil {
-    panic(err)
-  }
+	if err := dao.InitMySQL(); err != nil {
+		panic(err)
+	}
+
+	r := router.InitRouter()
+	if err := r.Run(); err != nil {
+		panic(err)
+	}
 }
