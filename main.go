@@ -1,9 +1,11 @@
 package main
 
-import (
-	"fmt"
-)
+import "main/router"
 
 func main() {
-	fmt.Println("Hello, World!")
+  r := router.InitRouter()
+
+  if err := r.Run(); err != nil {
+    panic(err)
+  }
 }
