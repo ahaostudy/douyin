@@ -11,6 +11,9 @@ func Auth() gin.HandlerFunc {
 		// 获取token
 		token := c.Query("token")
 		if len(token) == 0 {
+			token = c.PostForm("token")
+		}
+		if len(token) == 0 {
 			c.JSON(http.StatusOK, gin.H{
 				"status_code": 1,
 				"status_msg":  "User authentication failed",
