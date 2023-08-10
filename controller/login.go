@@ -7,6 +7,12 @@ import (
 	"net/http"
 )
 
+type LoginResponse struct {
+	Response
+	UserID uint   `json:"user_id"`
+	Token  string `json:"token"`
+}
+
 func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
@@ -14,9 +20,8 @@ func Login(c *gin.Context) {
 	// 登录验证
 	user, ok := service.Login(username, password)
 	if !ok {
-		c.JSON(http.StatusOK, gin.H{
-			"status_code": 1,
-			"status_msg":  "The username or password is incorrect",
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1, StatusMsg: "The username or password is incorrect",
 		})
 		return
 	}
@@ -24,18 +29,16 @@ func Login(c *gin.Context) {
 	// 生成token
 	token, err := utils.GenerateToken(user.ID, user.Username)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status_code": 1,
-			"status_msg":  "Server failed",
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1, StatusMsg: "Server failed",
 		})
 		return
 	}
 
 	// success
-	c.JSON(http.StatusOK, gin.H{
-		"status_code": 0,
-		"status_msg":  "OK",
-		"user_id":     user.ID,
-		"token":       token,
+	c.JSON(http.StatusOK, LoginResponse{
+		Response: Response{StatusCode: 0, StatusMsg: "OK"},
+		UserID:   user.ID,
+		Token:    token,
 	})
 }

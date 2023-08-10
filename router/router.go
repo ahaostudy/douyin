@@ -33,7 +33,7 @@ func InitRouter() *gin.Engine {
 		apiRouter.Use(jwt.Auth())
 
 		// 需要鉴权的路由
-		apiRouter.GET("/user/", controller.UserInfo)
+		apiRouter.GET("/user/", controller.Userinfo)
 	}
 
 	return r

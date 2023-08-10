@@ -1,42 +1,45 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"main/model"
 	"main/service"
 	"net/http"
 	"strconv"
 )
 
-func UserInfo(c *gin.Context) {
+type UserinfoResponse struct {
+	Response
+	User *model.User `json:"user"`
+}
+
+func Userinfo(c *gin.Context) {
 	qid, _ := strconv.ParseUint(c.Query("user_id"), 10, 32)
 	queryUserID := uint(qid)
-	tid, _ := c.Get("user_id")
-	tokenUserID := tid.(uint)
+	tokenUserID := c.GetUint("user_id")
 
 	// 参数内容不一致
 	if queryUserID != tokenUserID {
-		c.JSON(http.StatusOK, gin.H{
-			"status_code": 1,
-			"status_msg":  "Identity verification failed",
-			"user":        nil,
+		c.JSON(http.StatusOK, UserinfoResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Identity verification failed"},
 		})
 		return
 	}
 
 	// 获取用户信息
 	user, ok := service.GetUserByID(queryUserID)
+	fmt.Println(user, ok)
 	if !ok {
-		c.JSON(http.StatusOK, gin.H{
-			"status_code": 1,
-			"status_msg":  "The user does not exist",
-			"user":        nil,
+		c.JSON(http.StatusOK, UserinfoResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "The user does not exist"},
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status_code": 0,
-		"status_msg":  "OK",
-		"user":        user,
+	// success
+	c.JSON(http.StatusOK, UserinfoResponse{
+		Response: Response{StatusCode: 0, StatusMsg: "OK"},
+		User:     user,
 	})
 }

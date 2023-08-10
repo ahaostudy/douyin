@@ -1,13 +1,19 @@
 package dao
 
-import "main/model"
+import (
+	"fmt"
+	"main/config"
+	"main/model"
+)
 
 // GetUserByID 通过ID获取用户信息
 func GetUserByID(id uint) (*model.User, error) {
 	user := new(model.User)
 	// 联表查询用户基本信息、作品数、获赞数、点赞数
 	err := DB.Select(
-		"*",
+		"u.*",
+		fmt.Sprintf("CONCAT('%s', u.avatar) avatar", config.StaticDir),
+		fmt.Sprintf("CONCAT('%s', u.background_image) background_image", config.StaticDir),
 		"COUNT(DISTINCT v.id) work_count",
 		"COUNT(DISTINCT lv.id) total_favorited",
 		"COUNT(DISTINCT lu.id) favorite_count",

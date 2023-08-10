@@ -8,4 +8,3 @@
 go.mod
 node_modules
 config/config.yaml
-public/*.jpg
