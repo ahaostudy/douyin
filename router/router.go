@@ -24,9 +24,10 @@ func InitRouter() *gin.Engine {
 	apiRouter := r.Group("/douyin")
 	{
 		// 不需要鉴权的基本功能
-		apiRouter.GET("/feed/", controller.Feed)
 		apiRouter.POST("/user/register/", controller.Register)
 		apiRouter.POST("/user/login/", controller.Login)
+
+		apiRouter.GET("/feed/", jwt.Parse(), controller.Feed)
 
 		// 鉴权中间件
 		apiRouter.Use(jwt.Auth())

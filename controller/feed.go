@@ -24,12 +24,10 @@ func Feed(c *gin.Context) {
 		latestTime = time.UnixMilli(timeStamp)
 	}
 
-	// TODO 解析token
-	//token := c.Query("token")
-
 	// 获取视频列表
 	// maxCount: 30，单次获取最大视频数量为30，接口文件中要求的
-	videoList, ok := service.GetVideoList(latestTime, 30)
+	// user_id 为token上的user_id，用于获取该用户对视频的点赞和评论数据
+	videoList, ok := service.GetVideoList(latestTime, 30, c.GetUint("user_id"))
 	if !ok {
 		c.JSON(http.StatusOK, FeedResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Server failed"},
@@ -37,12 +35,13 @@ func Feed(c *gin.Context) {
 		return
 	}
 
-	// 获取最新视频的时间戳
+	// 获取最早发布视频的时间戳
 	var nextTime int64
 	if len(videoList) > 0 {
 		nextTime = videoList[0].CreatedAt.UnixMilli()
 	}
 
+	// success
 	c.JSON(http.StatusOK, FeedResponse{
 		Response:  Response{StatusCode: 0, StatusMsg: "OK"},
 		NextTime:  nextTime,
