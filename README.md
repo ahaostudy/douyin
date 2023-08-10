@@ -8,8 +8,6 @@
 #### 克隆并进去项目
 ```shell
 git clone git@gitee.com:loau/douyin.git
-```
-```shell
 cd douyin
 ```
 
@@ -22,8 +20,6 @@ cp config/config.bak.yaml config.yaml
 #### 同步项目依赖
 ```shell
 go mod init main
-```
-```shell
 go mod tidy
 ```
 

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/spf13/viper"
 	"main/config"
 	"main/dao"
 	"main/router"
@@ -16,7 +18,7 @@ func main() {
 	}
 
 	r := router.InitRouter()
-	if err := r.Run("0.0.0.0:8080"); err != nil {
+	if err := r.Run(fmt.Sprintf("%s:%d", viper.GetString("server.host"), viper.GetInt("server.port"))); err != nil {
 		panic(err)
 	}
 }

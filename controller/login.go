@@ -11,7 +11,7 @@ func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
-	// 登录
+	// 登录验证
 	user, ok := service.Login(username, password)
 	if !ok {
 		c.JSON(http.StatusOK, gin.H{

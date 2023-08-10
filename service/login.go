@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"main/dao"
 	"main/model"
 	"main/utils"
@@ -14,6 +15,7 @@ func Login(username, password string) (*model.User, bool) {
 		return nil, false
 	}
 	// 判断密码是否正确
+	fmt.Println(user.Password, password)
 	if user.Password != utils.MD5(password) {
 		return nil, false
 	}

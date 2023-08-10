@@ -2,10 +2,21 @@ package dao
 
 import "main/model"
 
-// GetUserByID 通过用户ID获取用户
+// GetUserByID 通过ID获取用户信息
 func GetUserByID(id uint) (*model.User, error) {
 	user := new(model.User)
-	err := DB.First(user, id).Error
+	// 联表查询用户基本信息、作品数、获赞数、点赞数
+	err := DB.Select(
+		"*",
+		"COUNT(DISTINCT v.id) work_count",
+		"COUNT(DISTINCT lv.id) total_favorited",
+		"COUNT(DISTINCT lu.id) favorite_count",
+	).Model(user).Table("users u").
+		Joins("LEFT JOIN videos v ON u.id = v.author_id").
+		Joins("LEFT JOIN likes lv ON v.id = lv.video_id").
+		Joins("LEFT JOIN likes lu ON u.id = lu.id").
+		Where("u.id = ?", id).
+		First(user).Error
 	return user, err
 }
 

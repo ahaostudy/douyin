@@ -4,6 +4,8 @@ import (
 	"main/controller"
 	"main/middleware/cors"
 	"main/middleware/jwt"
+	"os"
+	"path"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,8 +13,15 @@ import (
 // InitRouter 初始化路由
 func InitRouter() *gin.Engine {
 	r := gin.Default()
+
+	// 跨域处理
 	r.Use(cors.Cors())
 
+	// 配置静态路径
+	workDir, _ := os.Getwd()
+	r.Static("/static", path.Join(workDir, "public"))
+
+	// douyin api
 	apiRouter := r.Group("/douyin")
 	{
 		// 不需要鉴权的基本功能
@@ -20,7 +29,7 @@ func InitRouter() *gin.Engine {
 		apiRouter.POST("/user/register/", controller.Register)
 		apiRouter.POST("/user/login/", controller.Login)
 
-		// 使用鉴权中间件
+		// 鉴权中间件
 		apiRouter.Use(jwt.Auth())
 
 		// 需要鉴权的路由
