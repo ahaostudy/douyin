@@ -2,7 +2,7 @@ package dao
 
 import (
 	"fmt"
-	"main/config"
+	"github.com/spf13/viper"
 	"main/model"
 )
 
@@ -12,8 +12,8 @@ func GetUserByID(id uint) (*model.User, error) {
 	// 联表查询用户基本信息、作品数、获赞数、点赞数
 	err := DB.Select(
 		"u.*",
-		fmt.Sprintf("CONCAT('%s', u.avatar) avatar", config.StaticDir),
-		fmt.Sprintf("CONCAT('%s', u.background_image) background_image", config.StaticDir),
+		fmt.Sprintf("CONCAT('%s', u.avatar) avatar", viper.GetString("server.static")),
+		fmt.Sprintf("CONCAT('%s', u.background_image) background_image", viper.GetString("server.static")),
 		"COUNT(DISTINCT v.id) work_count",
 		"COUNT(DISTINCT lv.id) total_favorited",
 		"COUNT(DISTINCT lu.id) favorite_count",
