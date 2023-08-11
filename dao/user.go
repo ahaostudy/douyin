@@ -15,7 +15,7 @@ func GetUserByID(id uint) (*model.User, error) {
 		Model(user).Table("users u").
 		Joins("LEFT JOIN videos v ON u.id = v.author_id").
 		Joins("LEFT JOIN likes lv ON v.id = lv.video_id").
-		Joins("LEFT JOIN likes lu ON u.id = lu.id").
+		Joins("LEFT JOIN likes lu ON u.id = lu.user_id").
 		Where("u.id = ?", id).
 		First(user).Error
 	return user, err
