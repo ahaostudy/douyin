@@ -7,7 +7,7 @@ FROM users u
          LEFT JOIN videos v ON u.id = v.author_id
          LEFT JOIN likes lv ON v.id = lv.video_id
          LEFT JOIN likes lu on u.id = lu.user_id
-WHERE u.id = 15;
+WHERE u.id = 1;
 
 SELECT u.*,
        COUNT(DISTINCT v.id)  work_count,

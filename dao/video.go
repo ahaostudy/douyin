@@ -17,7 +17,7 @@ func GetVideoList(latestTime time.Time, maxCount int, userID uint) ([]*model.Vid
 			"COUNT(DISTINCT lu.id) favorite_count").
 			Joins("LEFT JOIN videos v ON u.id = v.author_id").
 			Joins("LEFT JOIN likes lv ON v.id = lv.video_id").
-			Joins("LEFT JOIN likes lu ON u.id = lu.id").
+			Joins("LEFT JOIN likes lu ON u.id = lu.user_id").
 			Group("u.id")
 	}).
 		Select("videos.*, "+
@@ -28,6 +28,31 @@ func GetVideoList(latestTime time.Time, maxCount int, userID uint) ([]*model.Vid
 		Where("videos.created_at <= ?", latestTime).
 		Order("videos.created_at").
 		Limit(maxCount).
+		Find(&videoList).Error
+
+	return videoList, err
+}
+
+// GetVideoListByLike 获取喜欢的视频列表
+func GetVideoListByLike(userID uint) ([]*model.Video, error) {
+	var videoList []*model.Video
+
+	err := DB.Preload("Author", func(db *gorm.DB) *gorm.DB {
+		return db.Table("users u").Select("u.*, " +
+			"COUNT(DISTINCT v.id) work_count," +
+			"COUNT(DISTINCT lv.id) total_favorited," +
+			"COUNT(DISTINCT lu.id) favorite_count").
+			Joins("LEFT JOIN videos v ON u.id = v.author_id").
+			Joins("LEFT JOIN likes lv ON v.id = lv.video_id").
+			Joins("LEFT JOIN likes lu ON u.id = lu.user_id").
+			Group("u.id")
+	}).
+		Select("videos.*, "+
+			"(SELECT COUNT(*) FROM likes l WHERE videos.id = l.video_id) AS favorite_count, "+
+			"(SELECT COUNT(*) FROM comments c WHERE videos.id = c.video_id) AS comment_count, "+
+			"true is_favorite").
+		Where("EXISTS(SELECT * FROM likes l WHERE videos.id = l.video_id AND l.user_id = ?)", userID).
+		Order("videos.created_at").
 		Find(&videoList).Error
 
 	return videoList, err
