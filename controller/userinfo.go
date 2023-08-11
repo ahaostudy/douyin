@@ -19,16 +19,8 @@ func Userinfo(c *gin.Context) {
 	queryUserID := uint(qid)
 	tokenUserID := c.GetUint("user_id")
 
-	// ID不一致
-	if queryUserID != tokenUserID {
-		c.JSON(http.StatusOK, UserinfoResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "Identity verification failed"},
-		})
-		return
-	}
-
 	// 获取用户信息
-	user, ok := service.GetUserByID(queryUserID)
+	user, ok := service.GetUserByID(queryUserID, tokenUserID)
 	fmt.Println(user, ok)
 	if !ok {
 		c.JSON(http.StatusOK, UserinfoResponse{

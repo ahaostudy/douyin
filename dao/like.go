@@ -16,8 +16,7 @@ func InsertLike(uid, vid uint) error {
 	return DB.Create(&model.Like{UserID: uid, VideoID: vid}).Error
 }
 
-// DeleteLike
-// 删除点赞记录，返回操作的行数
+// DeleteLike 删除点赞记录
 func DeleteLike(uid, vid uint) error {
 	return DB.Delete(new(model.Like), "user_id = ? AND video_id = ?", uid, vid).Error
 }

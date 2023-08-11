@@ -20,6 +20,7 @@ func InitRouter() *gin.Engine {
 	// 配置静态路径
 	workDir, _ := os.Getwd()
 	r.Static("/static", path.Join(workDir, "public"))
+
 	// douyin api
 	apiRouter := r.Group("/douyin")
 	{
@@ -38,6 +39,9 @@ func InitRouter() *gin.Engine {
 		apiRouter.GET("/publish/list/", controller.PubList)
 		apiRouter.POST("/favorite/action/", controller.FavoriteAction)
 		apiRouter.GET("/favorite/list/", controller.FavoriteList)
+		apiRouter.POST("/relation/action/", controller.RelationAction)
+		apiRouter.GET("/relation/follow/list/", controller.FollowList)
+		apiRouter.GET("/relation/follower/list/", controller.FollowerList)
 	}
 
 	return r

@@ -19,7 +19,7 @@ func GenerateToken(id uint, username string) (string, error) {
 		ID:       id,
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Duration(viper.GetInt("jwt.expire_duration")) * time.Second).Unix(),
+			ExpiresAt: time.Now().Add(time.Duration(viper.GetInt("jwt.expire_duration")) * time.Hour).Unix(),
 			Issuer:    viper.GetString("jwt.issuer"),
 			Subject:   viper.GetString("jwt.subject"),
 		},

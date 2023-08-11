@@ -6,8 +6,8 @@ import (
 )
 
 // GetFavoriteList 获取用户喜欢的视频列表
-func GetFavoriteList(userID uint) ([]*model.Video, bool) {
-	videoList, err := dao.GetVideoListByLike(userID)
+func GetFavoriteList(id, curID uint) ([]*model.Video, bool) {
+	videoList, err := dao.GetVideoListByLike(id, curID)
 	if err != nil {
 		return nil, false
 	}

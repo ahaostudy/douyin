@@ -64,5 +64,6 @@ func migration() error {
 		new(model.Video),
 		new(model.Like),
 		new(model.Comment),
+		new(model.Follow),
 	)
 }

@@ -19,16 +19,8 @@ func FavoriteList(c *gin.Context) {
 	queryUserID := uint(qid)
 	tokenUserID := c.GetUint("user_id")
 
-	// ID不一致
-	if queryUserID != tokenUserID {
-		c.JSON(http.StatusOK, FavoriteListResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "Identity verification failed"},
-		})
-		return
-	}
-
 	// 获取喜欢的视频列表
-	videoList, ok := service.GetFavoriteList(queryUserID)
+	videoList, ok := service.GetFavoriteList(queryUserID, tokenUserID)
 	if !ok {
 		c.JSON(http.StatusOK, FavoriteListResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Server failed"},

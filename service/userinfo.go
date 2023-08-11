@@ -6,8 +6,10 @@ import (
 )
 
 // GetUserByID 通过ID获取用户
-func GetUserByID(id uint) (*model.User, bool) {
-	user, err := dao.GetUserByID(id)
+// id 目标用户ID
+// tid 当前登录的用户ID
+func GetUserByID(id, curID uint) (*model.User, bool) {
+	user, err := dao.GetUserByID(id, curID)
 	if err != nil || user == nil {
 		return nil, false
 	}

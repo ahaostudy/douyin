@@ -23,11 +23,12 @@ func Feed(c *gin.Context) {
 		timeStamp, _ := strconv.ParseInt(latestTimeStr, 10, 64)
 		latestTime = time.UnixMilli(timeStamp)
 	}
+	userID := c.GetUint("user_id")
 
 	// 获取视频列表
 	// maxCount: 30，单次获取最大视频数量为30，接口文件中要求的
 	// user_id 为token上的user_id，用于获取该用户对视频的点赞和评论数据
-	videoList, ok := service.GetVideoList(latestTime, 30, c.GetUint("user_id"))
+	videoList, ok := service.GetVideoList(latestTime, 30, userID)
 	if !ok {
 		c.JSON(http.StatusOK, FeedResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Server failed"},
