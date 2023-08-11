@@ -36,6 +36,8 @@ func InitRouter() *gin.Engine {
 		apiRouter.GET("/user/", controller.Userinfo)
 		apiRouter.POST("/publish/action/", controller.PubAction)
 		apiRouter.GET("/publish/list/", controller.PubList)
+		apiRouter.POST("/favorite/action/", controller.FavoriteAction)
+		apiRouter.GET("/favorite/list/", controller.FavoriteList)
 	}
 
 	return r
