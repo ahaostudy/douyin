@@ -75,3 +75,25 @@ func GetFollowerList(id uint, curID uint) ([]*model.User, error) {
 		Find(&followerList).Error
 	return followerList, err
 }
+
+// GetFriendList 获取用户的朋友列表
+func GetFriendList(id uint, curID uint) ([]*model.User, error) {
+	var followerList []*model.User
+	err := DB.Select("u.*, "+
+		"COUNT(DISTINCT v.id) work_count,"+
+		"COUNT(DISTINCT l.id) total_favorited,"+
+		"(SELECT COUNT(*) FROM likes l WHERE l.user_id = u.id) favorite_count, "+
+		"(SELECT COUNT(*) FROM follows f WHERE f.follower_id = u.id) follow_count, "+
+		"(SELECT COUNT(*) FROM follows f WHERE f.user_id = u.id) follower_count, "+
+		"EXISTS(SELECT * FROM follows f WHERE f.follower_id = u.id AND f.user_id = ?) is_follow", curID).
+		Table("users u").
+		Joins("LEFT JOIN videos v ON v.author_id = u.id").
+		Joins("LEFT JOIN likes l ON l.video_id = v.id").
+		Joins("JOIN follows f").
+		Where("EXISTS(SELECT * FROM follows f WHERE f.user_id = u.id AND f.follower_id = ?) AND "+
+			"EXISTS(SELECT * FROM follows f WHERE f.user_id = ? AND f.follower_id = u.id) AND "+
+			"f.user_id = ?", id, id, id).
+		Group("u.id").
+		Find(&followerList).Error
+	return followerList, err
+}

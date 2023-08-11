@@ -8,26 +8,26 @@ import (
 	"strconv"
 )
 
-type FollowerListResponse struct {
+type FriendListResponse struct {
 	Response
 	UserList []*model.User `json:"user_list"`
 }
 
-func FollowerList(c *gin.Context) {
+func FriendList(c *gin.Context) {
 	qid, _ := strconv.ParseUint(c.Query("user_id"), 10, 32)
 	queryUserID := uint(qid)
 	tokenUserID := c.GetUint("user_id")
 
-	followerList, ok := service.GetFollowerList(queryUserID, tokenUserID)
+	followList, ok := service.GetFriendList(queryUserID, tokenUserID)
 	if !ok {
-		c.JSON(http.StatusOK, FollowerListResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "Get follower list failed"},
+		c.JSON(http.StatusOK, FriendListResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Get friend list failed"},
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, FollowerListResponse{
+	c.JSON(http.StatusOK, FriendListResponse{
 		Response: Response{StatusCode: 0, StatusMsg: "OK"},
-		UserList: followerList,
+		UserList: followList,
 	})
 }
