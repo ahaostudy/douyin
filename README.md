@@ -14,7 +14,7 @@ cd douyin
 #### 修改配置文件
 将 `config.bak.yaml` 复制为 `config.yaml`，并在 `config.yaml` 中根据需要修改配置。
 ```shell
-cp config/config.bak.yaml config.yaml
+cp config/config.yaml config.yaml
 ```
 
 #### 同步项目依赖
