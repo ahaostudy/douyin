@@ -56,7 +56,7 @@ func GetVideoListByAuthorID(authorID uint, curID uint) ([]*model.Video, error) {
 			"(SELECT COUNT(*) FROM comments c WHERE videos.id = c.video_id) AS comment_count, "+
 			"EXISTS(SELECT * FROM likes l WHERE videos.id = l.video_id AND l.user_id = ?) AS is_favorite",
 			authorID).
-		Where("videos.authorID = ?", authorID).
+		Where("videos.author_id = ?", authorID).
 		Order("videos.created_at").
 		Find(&videoList).Error
 
