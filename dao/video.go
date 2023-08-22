@@ -47,7 +47,7 @@ func GetVideoListByAuthorID(authorID uint, curID uint) ([]*model.Video, error) {
 			"(SELECT COUNT(*) FROM follows f WHERE f.follower_id = u.id) follow_count, "+
 			"(SELECT COUNT(*) FROM follows f WHERE f.user_id = u.id) follower_count, "+
 			"EXISTS(SELECT * FROM follows f WHERE f.user_id = u.id AND f.follower_id = ?) is_follow", curID).
-			Joins("LEFT JOIN videos v ON u.id = v.authorID").
+			Joins("LEFT JOIN videos v ON u.id = v.author_id").
 			Joins("LEFT JOIN likes lv ON v.id = lv.video_id").
 			Group("u.id")
 	}).
