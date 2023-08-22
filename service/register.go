@@ -20,7 +20,12 @@ func IsExistUser(username string) bool {
 func Register(username, password string) (*model.User, bool) {
 	// 将密码加密并添加到数据库
 	if user, err := dao.InsertUser(&model.User{
-		Username: username, Password: utils.MD5(password),
+		Name:            "user-" + username,
+		Username:        username,
+		Password:        utils.MD5(password),
+		Avatar:          "avatar.jpg",
+		BackgroundImage: "background.jpg",
+		Signature:       "好好学习，天天向上！",
 	}); err != nil {
 		return nil, false
 	} else {

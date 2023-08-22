@@ -12,10 +12,10 @@ FROM videos
            COUNT(DISTINCT vl.id) total_favorited,
            COUNT(DISTINCT ul.id) favorite_count
     FROM users u
-             LEFT JOIN videos v ON u.id = v.author_id
+             LEFT JOIN videos v ON u.id = v.authorID
              LEFT JOIN likes vl ON v.id = vl.video_id
              LEFT JOIN likes ul ON u.id = ul.user_id
     GROUP BY u.id
-)  users ON users.id = videos.author_id
-WHERE videos.author_id = 1
+)  users ON users.id = videos.authorID
+WHERE videos.authorID = 1
 ORDER BY videos.created_at;

@@ -3,6 +3,11 @@ package config
 import (
 	"github.com/spf13/viper"
 	"os"
+	"path"
+)
+
+var (
+	StaticPath string
 )
 
 // InitConfig 初始化项目配置
@@ -11,6 +16,8 @@ func InitConfig() error {
 	if err != nil {
 		return err
 	}
+
+	// 初始化配置文件
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile(workDir + "/config/config.yaml")
 
@@ -18,6 +25,9 @@ func InitConfig() error {
 	if err != nil {
 		return err
 	}
+
+	// 初始化全局变量
+	StaticPath = path.Join(workDir, viper.GetString("static.path"))
 
 	return nil
 }

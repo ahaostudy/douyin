@@ -35,8 +35,8 @@ func InitRouter() *gin.Engine {
 
 		// 需要鉴权的路由
 		apiRouter.GET("/user/", controller.Userinfo)
-		apiRouter.POST("/publish/action/", controller.PubAction)
-		apiRouter.GET("/publish/list/", controller.PubList)
+		apiRouter.POST("/publish/action/", controller.PublishAction)
+		apiRouter.GET("/publish/list/", controller.PublishList)
 		apiRouter.POST("/favorite/action/", controller.FavoriteAction)
 		apiRouter.GET("/favorite/list/", controller.FavoriteList)
 		apiRouter.POST("/relation/action/", controller.RelationAction)

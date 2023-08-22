@@ -1,18 +1,32 @@
 server:
-  host: 192.168.1.9
+  host: 0.0.0.0
   port: 8080
-  static: http://192.168.1.9:8080/static/
+  static: http://192.168.1.9:8080/static/ # 使用具体的IP，不要使用127.0.0.1、0.0.0.0、localhost等
 
 mysql:
-  host: 127.0.0.1
+  host: 139.9.65.13
   port: 3306
   dbname: douyin
-  username: root
-  password: root
+  username: douyin
+  password: ''
   charset: utf8mb4
 
+redis:
+  addr: 139.9.65.13:6379
+  password: ''
+
+rabbitmq:
+  host: 139.9.65.13
+  port: 5672
+  username: admin
+  password: admin
+  vhost: admin
+
 jwt:
-  expire_duration: 3600
+  expire_duration: 8760
   issuer: 'henhenzhuanyibi'
   subject: 'douyin'
   key: 'douyin-tiktok'
+
+static:
+  path: public/

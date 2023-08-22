@@ -16,11 +16,3 @@ func GetVideoList(latestTime time.Time, maxCount int, userID uint) ([]*model.Vid
 	}
 	return videoList, true
 }
-
-func GetVideoOne(uId uint, qId uint) ([]*model.Video, bool) {
-	videoList, err := dao.GetVideoListById(uId, qId)
-	if err != nil {
-		return nil, false
-	}
-	return videoList, true
-}

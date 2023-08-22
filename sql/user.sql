@@ -7,7 +7,7 @@ SELECT u.*,
        (SELECT COUNT(*) FROM follows f WHERE f.user_id = u.id)                      follower_count,
        EXISTS(SELECT * FROM follows f WHERE f.follower_id = u.id AND f.user_id = 5) is_follow
 FROM users u
-         LEFT JOIN videos v ON u.id = v.author_id
+         LEFT JOIN videos v ON u.id = v.authorID
          LEFT JOIN likes l ON v.id = l.video_id
 group by u.id;
 

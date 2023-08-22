@@ -11,10 +11,10 @@ FROM videos
                           COUNT(DISTINCT lv.id) total_favorited,
                           COUNT(DISTINCT lu.id) favorite_count
                    FROM users u
-                            LEFT JOIN videos v ON u.id = v.author_id
+                            LEFT JOIN videos v ON u.id = v.authorID
                             LEFT JOIN likes lv ON v.id = lv.video_id
                             LEFT JOIN likes lu ON u.id = lu.user_id
-                   GROUP BY u.id) users ON users.id = videos.author_id
+                   GROUP BY u.id) users ON users.id = videos.authorID
 WHERE videos.created_at <= '2023-08-10 18:13:33.56'
 ORDER BY videos.created_at
 LIMIT 30;
@@ -32,10 +32,10 @@ FROM videos
                           COUNT(DISTINCT lv.id) total_favorited,
                           COUNT(DISTINCT lu.id) favorite_count
                    FROM users u
-                            LEFT JOIN videos v ON u.id = v.author_id
+                            LEFT JOIN videos v ON u.id = v.authorID
                             LEFT JOIN likes lv ON v.id = lv.video_id
                             LEFT JOIN likes lu ON u.id = lu.user_id
-                   GROUP BY u.id) users ON users.id = videos.author_id
+                   GROUP BY u.id) users ON users.id = videos.authorID
 WHERE videos.created_at <= '2023-08-10 18:13:33.56'
   AND EXISTS(SELECT * FROM likes l WHERE videos.id = l.video_id AND l.user_id = 1)
 ORDER BY videos.created_at
