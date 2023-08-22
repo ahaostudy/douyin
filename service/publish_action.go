@@ -3,6 +3,8 @@ package service
 import (
 	"main/dao"
 	"main/model"
+	"path"
+	"strconv"
 	"time"
 )
 
@@ -11,9 +13,10 @@ func SavaFile(id uint, fileName string, title string) error {
 	video := model.Video{
 		AuthorID: id,
 		Title:    title,
-		PlayUrl:  fileName,
+		PlayUrl:  path.Join("play", strconv.Itoa(int(id)), fileName),
 		// TODO 截取封面图
-		CoverUrl:  "1.jpg",
+		// 保存路径为 cover/{uid}/{cover_image}
+		CoverUrl:  "cover/cover.jpg",
 		CreatedAt: time.Now(),
 	}
 	err := dao.InsertVideo(&video)

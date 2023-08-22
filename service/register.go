@@ -23,8 +23,8 @@ func Register(username, password string) (*model.User, bool) {
 		Name:            "user-" + username,
 		Username:        username,
 		Password:        utils.MD5(password),
-		Avatar:          "avatar.jpg",
-		BackgroundImage: "background.jpg",
+		Avatar:          "avatar/avatar.jpg",
+		BackgroundImage: "background/background.jpg",
 		Signature:       "好好学习，天天向上！",
 	}); err != nil {
 		return nil, false

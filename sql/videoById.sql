@@ -1,6 +1,6 @@
 SELECT videos.*,
-       CONCAT('http://172.30.24.3:8080/static/',videos.play_url)                     play_url,
-       CONCAT('http://172.30.24.3:8080/static/',videos.cover_url)                    cover_url,
+       CONCAT('http://172.30.24.1:8080/static/',videos.play_url)                     play_url,
+       CONCAT('http://172.30.24.1:8080/static/',videos.cover_url)                    cover_url,
        (SELECT COUNT(*) FROM likes l WHERE videos.id=l.video_id)            favorite_count,
        (SELECT COUNT(*) FROM comments c WHERE videos.id=c.video_id)         comment_count,
        EXISTS(SELECT * FROM likes l WHERE videos.id = l.video_id AND l.user_id = 1)  is_favorite,

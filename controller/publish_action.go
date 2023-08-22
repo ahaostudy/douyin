@@ -8,6 +8,7 @@ import (
 	"main/service"
 	"net/http"
 	"path/filepath"
+	"strconv"
 )
 
 type PublishActionResponse struct {
@@ -22,7 +23,7 @@ func PublishAction(c *gin.Context) {
 	// 生成文件路径
 	ext := filepath.Ext(file.Filename)
 	finalName := fmt.Sprintf("%s%s", uuid.New().String(), ext)
-	saveFile := filepath.Join(config.StaticPath, finalName)
+	saveFile := filepath.Join(config.StaticPath, "play", strconv.Itoa(int(uid)), finalName)
 
 	// 保存上传的文件到本地
 	if c.SaveUploadedFile(file, saveFile) != nil {

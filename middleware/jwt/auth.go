@@ -19,6 +19,7 @@ func Auth() gin.HandlerFunc {
 				"status_msg":  "User authentication failed",
 			})
 			c.Abort()
+			return
 		}
 
 		// 解析token
@@ -29,6 +30,7 @@ func Auth() gin.HandlerFunc {
 				"status_msg":  "User authentication failed",
 			})
 			c.Abort()
+			return
 		}
 
 		c.Set("user_id", claims.ID)
