@@ -20,3 +20,15 @@ func InsertLike(uid, vid uint) error {
 func DeleteLike(uid, vid uint) error {
 	return DB.Delete(new(model.Like), "user_id = ? AND video_id = ?", uid, vid).Error
 }
+
+func GetLikeListByUserID(uid uint) ([]*model.Like, error) {
+	var likeList []*model.Like
+	err := DB.Where("user_id = ?", uid).Find(&likeList).Error
+	return likeList, err
+}
+
+func GetLikeListByVideoID(vid uint) ([]*model.Like, error) {
+	var likeList []*model.Like
+	err := DB.Where("video_id = ?", vid).Find(&likeList).Error
+	return likeList, err
+}
