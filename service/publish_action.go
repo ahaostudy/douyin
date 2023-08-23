@@ -9,6 +9,7 @@ import (
 )
 
 // SavaFile 保存上传的视频数据到数据库
+// TODO sava -> save
 func SavaFile(id uint, fileName string, title string) error {
 	video := model.Video{
 		AuthorID: id,

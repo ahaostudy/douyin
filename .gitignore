@@ -8,3 +8,5 @@
 go.mod
 node_modules
 config/config.yaml
+.history/
+.vscode/

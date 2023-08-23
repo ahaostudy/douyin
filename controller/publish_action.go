@@ -2,13 +2,14 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"main/config"
 	"main/service"
 	"net/http"
 	"path/filepath"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type PublishActionResponse struct {
@@ -22,6 +23,7 @@ func PublishAction(c *gin.Context) {
 
 	// 生成文件路径
 	ext := filepath.Ext(file.Filename)
+
 	finalName := fmt.Sprintf("%s%s", uuid.New().String(), ext)
 	saveFile := filepath.Join(config.StaticPath, "play", strconv.Itoa(int(uid)), finalName)
 
