@@ -6,6 +6,7 @@ import (
 	"main/service"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type MessageChatResponse struct {
@@ -18,9 +19,16 @@ func MessageChat(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	tui, _ := strconv.ParseUint(c.Query("to_user_id"), 10, 32)
 	toUserID := uint(tui)
+	// 解析时间戳
+	preMsgTimeStamp := c.Query("pre_msg_time")
+	preMsgTime := time.UnixMilli(0)
+	if len(preMsgTimeStamp) > 0 {
+		timeStamp, _ := strconv.ParseInt(preMsgTimeStamp, 10, 64)
+		preMsgTime = time.UnixMilli(timeStamp)
+	}
 
 	// 获取聊天记录
-	messageList, ok := service.GetMessageList(userID, toUserID)
+	messageList, ok := service.GetMessageList(userID, toUserID, preMsgTime)
 	if !ok {
 		c.JSON(http.StatusOK, MessageChatResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Get message list failed"},

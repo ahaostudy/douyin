@@ -4,10 +4,15 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path"
+	"time"
 )
 
 var (
 	StaticPath string
+
+	RedisKeyTTL      = 24 * time.Hour
+	RedisKeyOfLike   = "like"
+	RedisValueOfNULL = "NULL"
 )
 
 // InitConfig 初始化项目配置

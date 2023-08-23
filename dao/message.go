@@ -2,6 +2,7 @@ package dao
 
 import (
 	"main/model"
+	"time"
 )
 
 // InsertMessage 插入一条消息记录
@@ -14,8 +15,8 @@ func InsertMessage(fromID, toID uint, content string) error {
 }
 
 // GetMessageList 获取消息列表
-func GetMessageList(fromID, toID uint) ([]*model.Message, error) {
+func GetMessageList(fromID, toID uint, preMsgTime time.Time) ([]*model.Message, error) {
 	var messageList []*model.Message
-	err := DB.Where("from_user_id = ? AND to_user_id = ?", fromID, toID).Find(&messageList).Error
+	err := DB.Where("from_user_id = ? AND to_user_id = ? AND created_at > ?", fromID, toID, preMsgTime).Find(&messageList).Error
 	return messageList, err
 }
