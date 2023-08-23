@@ -21,12 +21,10 @@ func ExtractThumbnail(videoPath, thumbnailRoot string) error {
 
 	fmt.Println("save cover cmd ", cmd)
 
-	out, err := cmd.Output()
+	_, err := cmd.Output()
 
 	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(string(out))
+		return err
 	}
 
 	return nil
@@ -50,8 +48,7 @@ func CreateCoverFile(thumbnailRoot string) error {
 			fmt.Println("创建文件失败:", err)
 			return err
 		}
-		file.Close()
-
+		defer file.Close()
 		fmt.Println("文件已创建")
 	} else if err != nil {
 		// 其他错误
