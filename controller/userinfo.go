@@ -31,7 +31,7 @@ func Userinfo(c *gin.Context) {
 		return
 	}
 
-	exclusived := utils.SerializeUser(user)
+	exclusived := utils.GetSaftUser(user)
 	fmt.Println("excluded password ", exclusived)
 
 	// success

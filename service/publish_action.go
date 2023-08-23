@@ -5,19 +5,20 @@ import (
 	"main/model"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 )
 
-// SavaFile 保存上传的视频数据到数据库
-// TODO sava -> save
-func SavaFile(id uint, fileName string, title string) error {
+// SaveFile 保存上传的视频数据到数据库
+func SaveFile(id uint, fileName string, title string) error {
+	coverName := strings.Split(fileName, ".")[0] + ".jpg"
 	video := model.Video{
 		AuthorID: id,
 		Title:    title,
 		PlayUrl:  path.Join("play", strconv.Itoa(int(id)), fileName),
 		// TODO 截取封面图
 		// 保存路径为 cover/{uid}/{cover_image}
-		CoverUrl:  "cover/cover.jpg",
+		CoverUrl:  path.Join("cover", strconv.Itoa(int(id)), coverName),
 		CreatedAt: time.Now(),
 	}
 	err := dao.InsertVideo(&video)
