@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"main/model"
 	"main/service"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type VideoResponse struct {
@@ -28,7 +29,7 @@ func PublishList(c *gin.Context) {
 
 	// success
 	c.JSON(http.StatusOK, VideoResponse{
-		Response:  Response{StatusCode: 1, StatusMsg: "Server failed"},
+		Response:  Response{StatusCode: 0, StatusMsg: "OK"},
 		VideoList: videoList,
 	})
 }

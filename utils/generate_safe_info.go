@@ -20,7 +20,7 @@ type ExclusivePwdUser struct {
 	FavoriteCount  int  `json:"favorite_count"`
 }
 
-func GetSaftUser(user *model.User) ExclusivePwdUser {
+func GetSafeUser(user *model.User) ExclusivePwdUser {
 	exclusiveUser := ExclusivePwdUser{
 		ID:              user.ID,
 		Name:            user.Username,

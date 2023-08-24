@@ -11,5 +11,10 @@ func GetVideoListByAuthorID(authorID uint, curID uint) ([]*model.Video, bool) {
 	if err != nil {
 		return nil, false
 	}
+
 	return videoList, true
+}
+
+func GetSafeUser(user *model.User) {
+	panic("unimplemented")
 }

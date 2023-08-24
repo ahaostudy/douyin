@@ -1,9 +1,10 @@
 package model
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Video struct {

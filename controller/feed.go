@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"main/model"
 	"main/service"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type FeedResponse struct {
@@ -39,7 +40,7 @@ func Feed(c *gin.Context) {
 	// 获取最早发布视频的时间戳
 	var nextTime int64
 	if len(videoList) > 0 {
-		nextTime = videoList[0].CreatedAt.UnixMilli()
+		nextTime = videoList[len(videoList)-1].CreatedAt.UnixMilli()
 	}
 
 	// success

@@ -9,7 +9,7 @@ type User struct {
 	ID              uint   `gorm:"primarykey" json:"id"`
 	Name            string `json:"name"`
 	Username        string `gorm:"unique" json:"username"`
-	Password        string `json:"password"`
+	Password        string `json:"-"`
 	Avatar          string `json:"avatar"`
 	Signature       string `json:"signature"`
 	BackgroundImage string `json:"background_image"`

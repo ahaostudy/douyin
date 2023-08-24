@@ -2,8 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"main/model"
 	"main/service"
-	"main/utils"
 	"net/http"
 	"strconv"
 
@@ -12,7 +12,7 @@ import (
 
 type UserinfoResponse struct {
 	Response
-	ExclusivePwdUser utils.ExclusivePwdUser `json:"user"`
+	User *model.User `json:"user"`
 }
 
 func Userinfo(c *gin.Context) {
@@ -31,12 +31,9 @@ func Userinfo(c *gin.Context) {
 		return
 	}
 
-	exclusived := utils.GetSaftUser(user)
-	fmt.Println("excluded password ", exclusived)
-
 	// success
 	c.JSON(http.StatusOK, UserinfoResponse{
-		Response:         Response{StatusCode: 0, StatusMsg: "OK"},
-		ExclusivePwdUser: exclusived,
+		Response: Response{StatusCode: 0, StatusMsg: "OK"},
+		User:     user,
 	})
 }

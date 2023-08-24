@@ -1,9 +1,10 @@
 package dao
 
 import (
-	"gorm.io/gorm"
 	"main/model"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // GetVideoList 获取视频列表
@@ -28,7 +29,7 @@ func GetVideoList(latestTime time.Time, maxCount int, userID uint) ([]*model.Vid
 			"EXISTS(SELECT * FROM likes l WHERE videos.id = l.video_id AND l.user_id = ?) AS is_favorite",
 			userID).
 		Where("videos.created_at <= ?", latestTime).
-		Order("videos.created_at").
+		Order("videos.created_at DESC").
 		Limit(maxCount).
 		Find(&videoList).Error
 
