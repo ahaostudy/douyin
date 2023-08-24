@@ -10,9 +10,10 @@ import (
 var (
 	StaticPath string
 
-	RedisKeyTTL      = 24 * time.Hour
-	RedisKeyOfLike   = "like"
-	RedisValueOfNULL = "NULL"
+	RedisKeyTTL       = 24 * time.Hour
+	RedisKeyOfLike    = "like"
+	RedisKeyOfMessage = "message"
+	RedisValueOfNULL  = "NULL"
 )
 
 // InitConfig 初始化项目配置

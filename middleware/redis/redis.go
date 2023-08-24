@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	Ctx     = context.Background()
-	RdbLike *redis.Client
+	Ctx        = context.Background()
+	RdbLike    *redis.Client
+	RdbMessage *redis.Client
 
 	// ...
 	// 根据需要再添加多个client
@@ -28,6 +29,11 @@ func InitRedis() {
 		DB:       1,
 	})
 
+	RdbMessage = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       2,
+	})
 }
 
 func WithTimeoutContextBySecond(second time.Duration) (context.Context, context.CancelFunc) {
