@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"main/model"
-)
+import "main/model"
 
 // 用户脱敏信息
 type ExclusivePwdUser struct {
