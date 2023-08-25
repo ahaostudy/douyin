@@ -5,7 +5,7 @@
 - MySQL
 - Redis
 - RabbitMQ
-- [FFmpeg](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip)
+- FFmpeg
 
 ## 项目启动
 

@@ -6,6 +6,7 @@
 .nfs*
 .idea
 go.mod
+go.sum
 node_modules
 config/config.yaml
 .history/

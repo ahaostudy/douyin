@@ -13,6 +13,12 @@ func DeleteComment(commentID uint) error {
 	return DB.Delete(&comment).Error
 }
 
+func GetCommentBasicInfo(id uint) (*model.Comment, error) {
+	var comment *model.Comment
+	err := DB.First(comment, id).Error
+	return comment, err
+}
+
 func GetComment(cid, uid uint) (*model.Comment, error) {
 	var comment *model.Comment
 	err := DB.Preload("User", func(db *gorm.DB) *gorm.DB {
@@ -29,7 +35,7 @@ func GetComment(cid, uid uint) (*model.Comment, error) {
 	}).
 		Select("comments.*").
 		Where("comments.id = ?", cid).
-		Find(&comment).Error
+		First(&comment).Error
 
 	return comment, err
 }

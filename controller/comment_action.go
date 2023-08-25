@@ -42,7 +42,7 @@ func CommentAction(c *gin.Context) {
 		comment := c.Query("comment_id")
 		commentID, _ := strconv.Atoi(comment)
 
-		if ok := service.DeleteComment(uint(commentID)); !ok {
+		if ok := service.DeleteComment(uint(commentID), uid); !ok {
 			c.JSON(http.StatusOK, CommentActionResponse{
 				Response: Response{StatusCode: 1, StatusMsg: "Delete comment failed"},
 			})
