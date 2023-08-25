@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
 	"main/service"
 	"main/utils"
 	"net/http"
@@ -10,8 +9,8 @@ import (
 
 type RegisterResponse struct {
 	Response
-	UserID uint   `json:"user_id"`
-	Token  string `json:"token"`
+	UserID uint   `json:"user_id,omitempty"`
+	Token  string `json:"token,omitempty"`
 }
 
 func Register(c *gin.Context) {
@@ -20,8 +19,8 @@ func Register(c *gin.Context) {
 
 	// 判断是否已经注册
 	if service.IsExistUser(username) {
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1, StatusMsg: "Username already exists",
+		c.JSON(http.StatusOK, RegisterResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Username already exists"},
 		})
 		return
 	}
@@ -29,8 +28,8 @@ func Register(c *gin.Context) {
 	// 注册用户
 	user, ok := service.Register(username, password)
 	if !ok {
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1, StatusMsg: "Server failed",
+		c.JSON(http.StatusOK, RegisterResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Server failed"},
 		})
 		return
 	}
@@ -38,10 +37,9 @@ func Register(c *gin.Context) {
 	// 生成Token
 	token, err := utils.GenerateToken(user.ID, user.Username)
 	if err != nil {
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1, StatusMsg: "Server failed",
+		c.JSON(http.StatusOK, RegisterResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Server failed"},
 		})
-		log.Println(err.Error())
 		return
 	}
 

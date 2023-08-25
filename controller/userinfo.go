@@ -12,7 +12,7 @@ import (
 
 type UserinfoResponse struct {
 	Response
-	User *model.User `json:"user"`
+	User *model.User `json:"user,omitempty"`
 }
 
 func Userinfo(c *gin.Context) {

@@ -30,7 +30,7 @@ func MessageAction(c *gin.Context) {
 	}
 
 	// 发送消息
-	if !service.InsertMessage(userID, toUserID, Content) {
+	if !service.SendMessage(userID, toUserID, Content) {
 		c.JSON(http.StatusOK, MessageActionResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Message action failed"},
 		})

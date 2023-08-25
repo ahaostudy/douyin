@@ -9,8 +9,8 @@ import (
 
 type LoginResponse struct {
 	Response
-	UserID uint   `json:"user_id"`
-	Token  string `json:"token"`
+	UserID uint   `json:"user_id,omitempty"`
+	Token  string `json:"token,omitempty"`
 }
 
 func Login(c *gin.Context) {
@@ -20,8 +20,8 @@ func Login(c *gin.Context) {
 	// 登录验证
 	user, ok := service.Login(username, password)
 	if !ok {
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1, StatusMsg: "The username or password is incorrect",
+		c.JSON(http.StatusOK, LoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "The username or password is incorrect"},
 		})
 		return
 	}
@@ -29,8 +29,8 @@ func Login(c *gin.Context) {
 	// 生成token
 	token, err := utils.GenerateToken(user.ID, user.Username)
 	if err != nil {
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1, StatusMsg: "Server failed",
+		c.JSON(http.StatusOK, LoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Server failed"},
 		})
 		return
 	}

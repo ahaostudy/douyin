@@ -11,10 +11,10 @@ func InitRabbitMQ() {
 	// 无论调用多少次 NewWorkRabbitMQ，只会创建一次连接
 	// 不同队列共用一个连接，可以保持不同队列消费消息的顺序
 
-	// 1. like_add
+	// like_add
 	RMQLikeAdd = NewWorkRabbitMQ("like_add")
 	go RMQLikeAdd.Consume(LikeAdd) // 传入一个业务函数，用于消费消息
-	// 2. like_del
+	// like_del
 	RMQLikeDel = NewWorkRabbitMQ("like_del")
 	go RMQLikeDel.Consume(LikeDel)
 }

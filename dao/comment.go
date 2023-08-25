@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-func DelCommon(commentId uint) {
+func DeleteComment(commentID uint) error {
 	comment := model.Comment{
-		ID: commentId,
+		ID: commentID,
 	}
-	DB.Delete(&comment)
+	return DB.Delete(&comment).Error
 }
 
-func SendComment(uId uint, cId uint) (*model.Comment, error) {
+func GetComment(cid, uid uint) (*model.Comment, error) {
 	var comment *model.Comment
 	err := DB.Preload("User", func(db *gorm.DB) *gorm.DB {
 		return db.Table("users u").Select("u.*, "+
@@ -22,30 +22,30 @@ func SendComment(uId uint, cId uint) (*model.Comment, error) {
 			"(SELECT COUNT(*) FROM likes l WHERE l.user_id = u.id) favorite_count, "+
 			"(SELECT COUNT(*) FROM follows f WHERE f.follower_id = u.id) follow_count, "+
 			"(SELECT COUNT(*) FROM follows f WHERE f.user_id = u.id) follower_count, "+
-			"EXISTS(SELECT * FROM follows f WHERE f.user_id = u.id AND f.follower_id = ?) is_follow", uId).
+			"EXISTS(SELECT * FROM follows f WHERE f.user_id = u.id AND f.follower_id = ?) is_follow", uid).
 			Joins("LEFT JOIN videos v ON u.id = v.author_id").
 			Joins("LEFT JOIN likes l ON v.id = l.video_id").
 			Group("u.id")
 	}).
 		Select("comments.*").
-		Where("comments.id = ?", cId).
+		Where("comments.id = ?", cid).
 		Find(&comment).Error
 
 	return comment, err
 }
 
-func AddComment(uId uint, vId uint, commentText string) uint {
+func InsertComment(uid uint, vid uint, commentText string) (uint, error) {
 	comment := model.Comment{
-		UserID:      uId,
-		VideoID:     vId,
+		UserID:      uid,
+		VideoID:     vid,
 		CommentText: commentText,
 		CreatedAt:   time.Now(),
 	}
-	DB.Create(&comment)
-	return comment.ID
+	err := DB.Create(&comment).Error
+	return comment.ID, err
 }
 
-func GetListComment(vId uint, uId uint) ([]*model.Comment, error) {
+func GetCommentList(vid uint, uid uint) ([]*model.Comment, error) {
 	var commentList []*model.Comment
 	err := DB.Preload("User", func(db *gorm.DB) *gorm.DB {
 		return db.Table("users u").Select("u.*, "+
@@ -54,13 +54,13 @@ func GetListComment(vId uint, uId uint) ([]*model.Comment, error) {
 			"(SELECT COUNT(*) FROM likes l WHERE l.user_id = u.id) favorite_count, "+
 			"(SELECT COUNT(*) FROM follows f WHERE f.follower_id = u.id) follow_count, "+
 			"(SELECT COUNT(*) FROM follows f WHERE f.user_id = u.id) follower_count, "+
-			"EXISTS(SELECT * FROM follows f WHERE f.user_id = u.id AND f.follower_id = ?) is_follow", uId).
+			"EXISTS(SELECT * FROM follows f WHERE f.user_id = u.id AND f.follower_id = ?) is_follow", uid).
 			Joins("LEFT JOIN videos v ON u.id = v.author_id").
 			Joins("LEFT JOIN likes l ON v.id = l.video_id").
 			Group("u.id")
 	}).
 		Select("comments.*").
-		Where("comments.video_id", vId).
+		Where("comments.video_id", vid).
 		Order("comments.created_at").
 		Find(&commentList).Error
 

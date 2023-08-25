@@ -45,8 +45,8 @@ func InitRouter() *gin.Engine {
 		apiRouter.GET("/relation/friend/list/", controller.FriendList)
 		apiRouter.POST("/message/action/", controller.MessageAction)
 		apiRouter.GET("/message/chat/", controller.MessageChat)
-		apiRouter.POST("/comment/action/", controller.SendComment)
-		apiRouter.GET("/comment/list/", controller.GetListComment)
+		apiRouter.POST("/comment/action/", controller.CommentAction)
+		apiRouter.GET("/comment/list/", controller.CommentList)
 	}
 
 	return r

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"main/config"
 	"main/dao"
@@ -14,7 +13,7 @@ import (
 // GetMessageList 获取消息列表
 func GetMessageList(userID, toUserID uint, preMsgTime time.Time) ([]*model.Message, bool) {
 	var messageList []*model.Message
-	minKey, maxKey := generateMessageKey(userID, toUserID)
+	minKey, maxKey := redis.GenerateMessageKey(userID, toUserID)
 
 	ctx, cancel := redis.WithTimeoutContextBySecond(3)
 	defer cancel()
@@ -35,7 +34,6 @@ func GetMessageList(userID, toUserID uint, preMsgTime time.Time) ([]*model.Messa
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return messageList, false
 		}
-		fmt.Println(latestTime.UnixMilli())
 		redis.RdbMessage.HSet(ctx, minKey, maxKey, latestTime.UnixMilli())
 		latestTimeStr = strconv.FormatInt(latestTime.UnixMilli(), 10)
 	}
@@ -58,18 +56,4 @@ func GetMessageList(userID, toUserID uint, preMsgTime time.Time) ([]*model.Messa
 	// 4. pre_msg_time在最新消息时间之前，从数据库获取聊天记录返回
 	messageList, err = dao.GetMessageList(userID, toUserID, preMsgTime)
 	return messageList, err == nil
-}
-
-// TODO: 这些 generate key 的函数感觉统一起来管理更好
-// 通过 user_a_id 与 user_b_id 生成两个 key ，保证小 id 在前，大 id 在后
-func generateMessageKey(a, b uint) (string, string) {
-	var minID, maxID uint
-	if a < b {
-		minID, maxID = a, b
-	} else {
-		minID, maxID = b, a
-	}
-	minKey := fmt.Sprintf("%s:%d", config.RedisKeyOfMessage, minID)
-	maxKey := fmt.Sprintf("%s:%d", config.RedisKeyOfMessage, maxID)
-	return minKey, maxKey
 }

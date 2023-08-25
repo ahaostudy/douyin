@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"main/dao"
 	"main/middleware/redis"
 	"main/model"
@@ -10,7 +11,7 @@ import (
 var userLatestMessageTime = make(map[uint]chan time.Time)
 
 // 发送消息业务（不处理前端bug的版本）
-func insertMessage(fromID, toID uint, content string) bool {
+func sentMessage(fromID, toID uint, content string) bool {
 	// 插入一条消息到数据库
 	message, err := dao.InsertMessage(&model.Message{
 		FromUserID: fromID,
@@ -21,14 +22,17 @@ func insertMessage(fromID, toID uint, content string) bool {
 		return false
 	}
 
-	minKey, maxKey := generateMessageKey(fromID, toID)
+	minKey, maxKey := redis.GenerateMessageKey(fromID, toID)
 
 	ctx, cancel := redis.WithTimeoutContextBySecond(2)
 	defer cancel()
 
 	// 更新redis缓存的最新消息时间
 	// 更新失败时删除该缓存，保证数据一致性
-	// TODO: 需要加锁，防止新消息更新到redis的速度比旧消息快，造成旧消息的时间覆盖新消息
+	// 使用乐观锁，防止新消息更新到redis的速度比旧消息快，造成旧消息的时间覆盖新消息
+	lockKey := generateLockKey(minKey, maxKey)
+	lockID, err := redis.Lock(redis.RdbMessage, lockKey)
+	defer redis.Unlock(redis.RdbMessage, lockKey, lockID)
 	if err := redis.RdbMessage.HSet(ctx, minKey, maxKey, message.CreatedAt.UnixMilli()).Err(); err != nil {
 		redis.RdbMessage.HDel(ctx, minKey, maxKey)
 	}
@@ -36,8 +40,8 @@ func insertMessage(fromID, toID uint, content string) bool {
 	return true
 }
 
-// InsertMessage 发送消息业务
-func InsertMessage(fromID, toID uint, content string) bool {
+// SendMessage 发送消息业务
+func SendMessage(fromID, toID uint, content string) bool {
 	// 创建一个管道，提供给chat接口
 	// chat接口会将请求时间戳传入，作为当前这条消息的发送时间
 	if userLatestMessageTime[fromID] != nil {
@@ -49,7 +53,7 @@ func InsertMessage(fromID, toID uint, content string) bool {
 	go func() {
 		// 阻塞等待chat接口传递时间戳
 		t := <-userLatestMessageTime[fromID]
-		// 接收完后删除时间戳
+		// 接收完后删除管道
 		userLatestMessageTime[fromID] = nil
 		// 插入一条消息到数据库
 		message, err := dao.InsertMessage(&model.Message{
@@ -62,18 +66,26 @@ func InsertMessage(fromID, toID uint, content string) bool {
 			return
 		}
 
-		minKey, maxKey := generateMessageKey(fromID, toID)
+		minKey, maxKey := redis.GenerateMessageKey(fromID, toID)
 
 		ctx, cancel := redis.WithTimeoutContextBySecond(2)
 		defer cancel()
 
 		// 更新redis缓存的最新消息时间
 		// 更新失败时删除该缓存，保证数据一致性
-		// TODO: 需要加锁，防止新消息更新到redis的速度比旧消息快，造成旧消息的时间覆盖新消息
+		// 使用乐观锁，防止新消息更新到redis的速度比旧消息快，造成旧消息的时间覆盖新消息
+		lockKey := generateLockKey(minKey, maxKey)
+		lockID, err := redis.Lock(redis.RdbMessage, lockKey)
+		defer redis.Unlock(redis.RdbMessage, lockKey, lockID)
 		if err := redis.RdbMessage.HSet(ctx, minKey, maxKey, message.CreatedAt.UnixMilli()).Err(); err != nil {
 			redis.RdbMessage.HDel(ctx, minKey, maxKey)
 		}
 	}()
 
 	return true
+}
+
+// 生成lock的key
+func generateLockKey(minKey, maxKey string) string {
+	return fmt.Sprintf("%s-%s", minKey, maxKey)
 }

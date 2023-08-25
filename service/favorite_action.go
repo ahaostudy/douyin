@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"main/config"
 	"main/dao"
 	"main/middleware/rabbitmq"
@@ -27,7 +26,7 @@ func FavoriteAction(uid, vid uint, t int) bool {
 // 点赞业务
 // TODO: 使用MQ异步更新MySQL，怎么保证Redis和MySQL数据一致
 func like(uid, vid uint) bool {
-	key := generateLikeKey(vid)
+	key := redis.GenerateLikeKey(vid)
 	ctx, cancel := redis.WithTimeoutContextBySecond(3)
 	defer cancel()
 
@@ -50,7 +49,7 @@ func like(uid, vid uint) bool {
 	redis.RdbLike.Expire(ctx, key, config.RedisKeyTTL)
 
 	// 3. 写入redis成功，使用MQ异步更新MySQL
-	if err := rabbitmq.RMQLikeAdd.Publish(generateLikeAddMQParam(uid, vid)); err != nil {
+	if err := rabbitmq.RMQLikeAdd.Publish(rabbitmq.GenerateLikeAddMQParam(uid, vid)); err != nil {
 		// 如果消息发送到MQ失败，则撤销redis的数据
 		redis.RdbLike.SRem(ctx, key, uid)
 		return false
@@ -62,7 +61,7 @@ func like(uid, vid uint) bool {
 // 取消点赞
 // 取消点赞逻辑与点赞逻辑类似，不重复写注释
 func unLike(uid, vid uint) bool {
-	key := generateLikeKey(vid)
+	key := redis.GenerateLikeKey(vid)
 	ctx, cancel := redis.WithTimeoutContextBySecond(3)
 	defer cancel()
 
@@ -78,27 +77,12 @@ func unLike(uid, vid uint) bool {
 	}
 	redis.RdbLike.Expire(ctx, key, config.RedisKeyTTL)
 
-	if err := rabbitmq.RMQLikeDel.Publish(generateLikeDelMQParam(uid, vid)); err != nil {
+	if err := rabbitmq.RMQLikeDel.Publish(rabbitmq.GenerateLikeDelMQParam(uid, vid)); err != nil {
 		redis.RdbLike.SAdd(ctx, key, uid)
 		return false
 	}
 
 	return true
-}
-
-// 生成传入 LikeAdd MQ 的参数
-func generateLikeAddMQParam(uid, vid uint) []byte {
-	return []byte(fmt.Sprintf("%d %d", uid, vid))
-}
-
-// 生成传入 LikeDel MQ 的参数
-func generateLikeDelMQParam(uid, vid uint) []byte {
-	return []byte(fmt.Sprintf("%d %d", uid, vid))
-}
-
-// 通过 video_id 生成 key
-func generateLikeKey(id uint) string {
-	return fmt.Sprintf("%s:%d", config.RedisKeyOfLike, id)
 }
 
 // 读取视频点赞列表到Redis
@@ -108,7 +92,7 @@ func loadLikeListByVideo(vid uint) error {
 	if err != nil {
 		return err
 	}
-	key := generateLikeKey(vid)
+	key := redis.GenerateLikeKey(vid)
 
 	ctx, cancel := redis.WithTimeoutContextBySecond(2)
 	defer cancel()
