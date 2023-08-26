@@ -19,7 +19,7 @@ func PublishList(c *gin.Context) {
 	tid := c.GetUint("user_id")
 
 	// 获取用户的作品列表
-	videoList, ok := service.GetVideoListByAuthorID(uint(qid), tid)
+	videoList, ok := service.GetWorkList(uint(qid), tid)
 	if !ok {
 		c.JSON(http.StatusOK, VideoResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Server failed"},

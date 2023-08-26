@@ -10,11 +10,17 @@ import (
 var (
 	StaticPath string
 
-	RedisKeyLock      = "mutex"
-	RedisKeyTTL       = 24 * time.Hour
-	RedisKeyOfLike    = "like"
-	RedisKeyOfMessage = "message"
-	RedisValueOfNULL  = "NULL"
+	RedisKeyLock       = "mutex"
+	RedisKeyTTL        = 24 * time.Hour
+	RedisKeyOfLike     = "like"
+	RedisKeyOfOpus     = "opus"
+	RedisKeyOfAuthor   = "author"
+	RedisKeyOfFollow   = "follow"
+	RedisKeyOfFollower = "follower"
+	RedisKeyOfUser     = "user"
+	RedisKeyOfMessage  = "message"
+	RedisKeyOfComment  = "comment"
+	RedisValueOfNULL   = "NULL"
 )
 
 // InitConfig 初始化项目配置

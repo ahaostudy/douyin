@@ -8,18 +8,18 @@ import (
 	"strings"
 )
 
-// GenerateLikeAddMQParam 生成传入 LikeAdd MQ 的参数
-func GenerateLikeAddMQParam(uid, vid uint) []byte {
+// GenerateLikeMQParam 生成传入 Like MQ 的参数
+func GenerateLikeMQParam(uid, vid uint) []byte {
 	return []byte(fmt.Sprintf("%d %d", uid, vid))
 }
 
-// GenerateLikeDelMQParam 生成传入 LikeDel MQ 的参数
-func GenerateLikeDelMQParam(uid, vid uint) []byte {
+// GenerateUnLikeMQParam 生成传入 UnLike MQ 的参数
+func GenerateUnLikeMQParam(uid, vid uint) []byte {
 	return []byte(fmt.Sprintf("%d %d", uid, vid))
 }
 
-// LikeAdd 点赞业务
-func LikeAdd(msg *amqp.Delivery) error {
+// Like 点赞业务
+func Like(msg *amqp.Delivery) error {
 	// TODO 校验参数是否正确、dao层调用失败要重试
 	params := strings.Split(string(msg.Body), " ")
 	_uid, _ := strconv.ParseUint(params[0], 10, 32)
@@ -33,8 +33,8 @@ func LikeAdd(msg *amqp.Delivery) error {
 	return nil
 }
 
-// LikeDel 取消点赞
-func LikeDel(msg *amqp.Delivery) error {
+// UnLike 取消点赞
+func UnLike(msg *amqp.Delivery) error {
 	// TODO 校验参数是否正确、dao层调用失败要重试
 	params := strings.Split(string(msg.Body), " ")
 	_uid, _ := strconv.ParseUint(params[0], 10, 32)

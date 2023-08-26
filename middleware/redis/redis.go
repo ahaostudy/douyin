@@ -12,9 +12,15 @@ import (
 )
 
 var (
-	Ctx        = context.Background()
-	RdbLike    *redis.Client
-	RdbMessage *redis.Client
+	Ctx         = context.Background()
+	RdbLike     *redis.Client
+	RdbOpus     *redis.Client
+	RdbAuthor   *redis.Client
+	RdbFollow   *redis.Client
+	RdbFollower *redis.Client
+	RdbUser     *redis.Client
+	RdbMessage  *redis.Client
+	RdbComment  *redis.Client
 )
 
 // InitRedis 初始化Redis
@@ -29,11 +35,40 @@ func InitRedis() {
 		Password: password,
 		DB:       1,
 	})
-
-	RdbMessage = redis.NewClient(&redis.Options{
+	RdbOpus = redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
 		DB:       2,
+	})
+	RdbAuthor = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       3,
+	})
+	RdbFollow = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       4,
+	})
+	RdbFollower = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       5,
+	})
+	RdbUser = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       6,
+	})
+	RdbMessage = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       7,
+	})
+	RdbComment = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       8,
 	})
 }
 

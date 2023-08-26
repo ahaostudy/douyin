@@ -2,16 +2,15 @@ package controller
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"main/config"
 	"main/middleware/ffmpeg"
+	"main/model"
 	"main/service"
 	"net/http"
 	"path/filepath"
 	"strconv"
-	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type PublishActionResponse struct {
@@ -24,13 +23,13 @@ func PublishAction(c *gin.Context) {
 	file, _ := c.FormFile("data")
 
 	// 生成文件路径
+	fileName := uuid.New().String()
 	ext := filepath.Ext(file.Filename)
-
-	finalName := fmt.Sprintf("%s%s", uuid.New().String(), ext)
-	saveFile := filepath.Join(config.StaticPath, "play", strconv.Itoa(int(uid)), finalName)
+	videoFinalName := fmt.Sprintf("%s%s", fileName, ext)
+	videoSaveFile := filepath.Join(config.StaticPath, "play", strconv.Itoa(int(uid)), videoFinalName)
 
 	// 保存上传的文件到本地
-	if c.SaveUploadedFile(file, saveFile) != nil {
+	if c.SaveUploadedFile(file, videoSaveFile) != nil {
 		c.JSON(http.StatusOK, PublishActionResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Submission failed"},
 		})
@@ -39,19 +38,21 @@ func PublishAction(c *gin.Context) {
 
 	// 有待优化，比如常量需不需要统一起来管理
 	// 这里的文件后缀从 视频格式后缀 -> .jpg，文件名保持一致
-	ext = ".jpg"
-	coverfinalName := strings.Split(finalName, ".")[0] + ext
-	coverSaveFile := filepath.Join(config.StaticPath, "cover", strconv.Itoa(int(uid)), coverfinalName)
+	coverFinalName := fmt.Sprintf("%s.jpg", fileName)
+	coverSaveFile := filepath.Join(config.StaticPath, "cover", strconv.Itoa(int(uid)), coverFinalName)
 
-	if ffmpeg.ExtractThumbnail(saveFile, coverSaveFile) != nil {
+	// 截取封面图
+	if ffmpeg.ExtractThumbnail(videoSaveFile, coverSaveFile) != nil {
 		c.JSON(http.StatusOK, PublishActionResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Submission failed"},
 		})
 		return
 	}
 
-	// 保存到数据库
-	if service.SaveFile(uid, finalName, title) != nil {
+	// 更新数据库
+	if service.PublishAction(&model.Video{
+		AuthorID: uid, PlayUrl: videoFinalName, CoverUrl: coverFinalName, Title: title,
+	}) != nil {
 		c.JSON(http.StatusOK, PublishActionResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Submission failed"},
 		})

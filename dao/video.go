@@ -7,8 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// GetVideoList 获取视频列表
-func GetVideoList(latestTime time.Time, maxCount int, userID uint) ([]*model.Video, error) {
+// GetVideoFeedList 获取视频流列表
+func GetVideoFeedList(latestTime time.Time, maxCount int, userID uint) ([]*model.Video, error) {
 	var videoList []*model.Video
 
 	err := DB.Preload("Author", func(db *gorm.DB) *gorm.DB {
@@ -34,6 +34,19 @@ func GetVideoList(latestTime time.Time, maxCount int, userID uint) ([]*model.Vid
 		Find(&videoList).Error
 
 	return videoList, err
+}
+
+// GetBasicVideoList 获取视频列表
+func GetBasicVideoList(authorID uint) ([]*model.Video, error) {
+	var videoList []*model.Video
+	err := DB.Where("author_id = ?", authorID).Find(&videoList).Error
+	return videoList, err
+}
+
+func GetBasicVideo(id uint) (*model.Video, error) {
+	video := new(model.Video)
+	err := DB.Where("id = ?", id).First(video).Error
+	return video, err
 }
 
 // GetVideoListByAuthorID 获取作品列表
@@ -93,6 +106,6 @@ func GetVideoListByLike(id, curID uint) ([]*model.Video, error) {
 
 // InsertVideo 插入一条视频数据
 func InsertVideo(video *model.Video) error {
-	err := DB.Create(video).Error
+	err := DB.Create(&video).Error
 	return err
 }

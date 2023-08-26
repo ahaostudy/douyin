@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"main/model"
 	"main/service"
 	"net/http"
@@ -23,7 +22,6 @@ func Userinfo(c *gin.Context) {
 
 	// 获取用户信息
 	user, ok := service.GetUserByID(queryUserID, tokenUserID)
-	fmt.Println(user, ok)
 	if !ok {
 		c.JSON(http.StatusOK, UserinfoResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "The user does not exist"},

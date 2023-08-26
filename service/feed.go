@@ -10,7 +10,7 @@ import (
 func GetVideoList(latestTime time.Time, maxCount int, userID uint) ([]*model.Video, bool) {
 	var videoList []*model.Video
 	var err error
-	videoList, err = dao.GetVideoList(latestTime, maxCount, userID)
+	videoList, err = dao.GetVideoFeedList(latestTime, maxCount, userID)
 	if err != nil {
 		return nil, false
 	}
