@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"fmt"
 	"github.com/streadway/amqp"
+	"main/config"
 	"main/dao"
 	"strconv"
 	"strings"
@@ -20,29 +21,51 @@ func GenerateUnLikeMQParam(uid, vid uint) []byte {
 
 // Like 点赞业务
 func Like(msg *amqp.Delivery) error {
-	// TODO 校验参数是否正确、dao层调用失败要重试
+	// 解析参数
 	params := strings.Split(string(msg.Body), " ")
-	_uid, _ := strconv.ParseUint(params[0], 10, 32)
-	_vid, _ := strconv.ParseUint(params[1], 10, 32)
-	uid, vid := uint(_uid), uint(_vid)
-
-	if err := dao.InsertLike(uid, vid); err != nil {
+	_uid, err := strconv.ParseUint(params[0], 10, 32)
+	if err != nil {
 		return err
 	}
+	_vid, err := strconv.ParseUint(params[1], 10, 32)
+	if err != nil {
+		return err
+	}
+	uid, vid := uint(_uid), uint(_vid)
 
-	return nil
+	// 操作数据库
+	for i := 0; i < config.SQLMaxReTryCount; i++ {
+		if e := dao.InsertLike(uid, vid); e != nil {
+			err = e
+		} else {
+			break
+		}
+	}
+
+	return err
 }
 
 // UnLike 取消点赞
 func UnLike(msg *amqp.Delivery) error {
-	// TODO 校验参数是否正确、dao层调用失败要重试
+	// 解析参数
 	params := strings.Split(string(msg.Body), " ")
-	_uid, _ := strconv.ParseUint(params[0], 10, 32)
-	_vid, _ := strconv.ParseUint(params[1], 10, 32)
+	_uid, err := strconv.ParseUint(params[0], 10, 32)
+	if err != nil {
+		return err
+	}
+	_vid, err := strconv.ParseUint(params[1], 10, 32)
+	if err != nil {
+		return err
+	}
 	uid, vid := uint(_uid), uint(_vid)
 
-	if err := dao.DeleteLike(uid, vid); err != nil {
-		return err
+	// 操作数据库
+	for i := 0; i < config.SQLMaxReTryCount; i++ {
+		if e := dao.DeleteLike(uid, vid); e != nil {
+			err = e
+		} else {
+			break
+		}
 	}
 
 	return nil

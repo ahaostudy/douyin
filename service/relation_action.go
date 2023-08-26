@@ -35,7 +35,7 @@ func follow(uid, tid uint) bool {
 	if n, err := redis.RdbFollow.SAdd(ctx, fk, tid).Result(); n == 0 || err != nil {
 		return false
 	}
-	if n, err := redis.RdbFollower.SAdd(ctx, fek, uid).Result(); n == 0 || err != nil {
+	if n, err := redis.RdbFollow.SAdd(ctx, fek, uid).Result(); n == 0 || err != nil {
 		redis.RdbFollow.SRem(ctx, fk, tid)
 		return false
 	}
@@ -43,7 +43,7 @@ func follow(uid, tid uint) bool {
 	// 异步更新数据库
 	if rabbitmq.RMQFollow.Publish(rabbitmq.GenerateFollowMQParam(uid, tid)) != nil {
 		redis.RdbFollow.SRem(ctx, fk, tid)
-		redis.RdbFollower.SRem(ctx, fek, uid)
+		redis.RdbFollow.SRem(ctx, fek, uid)
 		return false
 	}
 
@@ -86,14 +86,14 @@ func unFollow(uid, tid uint) bool {
 	if n, err := redis.RdbFollow.SRem(ctx, fk, tid).Result(); n == 0 || err != nil {
 		return false
 	}
-	if n, err := redis.RdbFollower.SRem(ctx, fek, uid).Result(); n == 0 || err != nil {
+	if n, err := redis.RdbFollow.SRem(ctx, fek, uid).Result(); n == 0 || err != nil {
 		redis.RdbFollow.SAdd(ctx, fk, tid)
 		return false
 	}
 
 	if rabbitmq.RMQUnFollow.Publish(rabbitmq.GenerateUnFollowMQParam(uid, tid)) != nil {
 		redis.RdbFollow.SAdd(ctx, fk, tid)
-		redis.RdbFollower.SAdd(ctx, fek, uid)
+		redis.RdbFollow.SAdd(ctx, fek, uid)
 		return false
 	}
 

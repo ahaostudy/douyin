@@ -13,7 +13,6 @@ var (
 	RedisKeyLock       = "mutex"
 	RedisKeyTTL        = 24 * time.Hour
 	RedisKeyOfLike     = "like"
-	RedisKeyOfOpus     = "opus"
 	RedisKeyOfAuthor   = "author"
 	RedisKeyOfFollow   = "follow"
 	RedisKeyOfFollower = "follower"
@@ -21,6 +20,8 @@ var (
 	RedisKeyOfMessage  = "message"
 	RedisKeyOfComment  = "comment"
 	RedisValueOfNULL   = "NULL"
+
+	SQLMaxReTryCount = 5
 )
 
 // InitConfig 初始化项目配置

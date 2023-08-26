@@ -6,13 +6,69 @@ import (
 	"main/dao"
 	"main/middleware/redis"
 	"main/model"
+	"strconv"
 	"sync"
 )
 
+type FollowPair struct {
+	Idx    int
+	Follow *model.User
+}
+
 // GetFollowList 获取关注列表
 func GetFollowList(id, curID uint) ([]*model.User, bool) {
-	followList, err := dao.GetFollowList(id, curID)
-	return followList, err == nil
+	ctx, cancel := redis.WithTimeoutContextBySecond(2)
+	defer cancel()
+	key := redis.GenerateFollowKey(id)
+
+	// 1. 加载关注列表到redis
+	if LoadFollowList(ctx, id) != nil {
+		return nil, false
+	}
+
+	// 2. 从redis中获取关注列表
+	follows, err := redis.RdbFollow.SMembers(ctx, key).Result()
+	if err != nil {
+		return nil, false
+	}
+
+	// 3. 根据关注列表的用户ID获取用户信息
+	followChan := make(chan FollowPair)
+	status, nullIdx := true, len(follows)
+	for i, follow := range follows {
+		go func(i int, follow string) {
+			// 跳过并记录空值的下标
+			if follow == config.RedisValueOfNULL {
+				nullIdx = i
+				return
+			}
+			_fid, _ := strconv.ParseUint(follow, 10, 64)
+			fid := uint(_fid)
+			user, ok := GetUserByID(fid, curID)
+			if !ok {
+				status = false
+			}
+			followChan <- FollowPair{Idx: i, Follow: user}
+		}(i, follow)
+	}
+
+	// 4. 通过管道获取结果，添加到结果切片中
+	if len(follows) <= 1 {
+		return nil, len(follows) == 1
+	}
+	// 因为缓存中有一个空值，所以结果的元素个数应-1
+	followList := make([]*model.User, len(follows)-1)
+	for i := 1; i < len(follows); i++ {
+		follow := <-followChan
+		idx := follow.Idx
+		// 跳过空值
+		if idx >= nullIdx {
+			idx--
+		}
+		followList[idx] = follow.Follow
+	}
+
+	return followList, status
 }
 
 // IsFollow 判断 id 是否关注 followID

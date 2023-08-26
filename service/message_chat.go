@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 	"main/config"
 	"main/dao"
@@ -31,9 +32,12 @@ func GetMessageList(userID, toUserID uint, preMsgTime time.Time) ([]*model.Messa
 	if len(latestTimeStr) == 0 || err != nil {
 		// 不存在时从MySQL读取数据到Redis
 		latestTime, err := dao.GetLatestMessageTime(userID, toUserID)
-		if err != nil && err != gorm.ErrRecordNotFound {
+		if err == gorm.ErrRecordNotFound {
+			latestTime = time.UnixMilli(0)
+		} else if err != nil {
 			return messageList, false
 		}
+		fmt.Println(latestTime)
 		redis.RdbMessage.HSet(ctx, minKey, maxKey, latestTime.UnixMilli())
 		latestTimeStr = strconv.FormatInt(latestTime.UnixMilli(), 10)
 	}

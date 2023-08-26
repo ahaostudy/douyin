@@ -21,10 +21,6 @@ func GenerateUserKey(id uint) string {
 	return fmt.Sprintf("%s:%d", config.RedisKeyOfUser, id)
 }
 
-func GenerateOpusKey(id uint) string {
-	return fmt.Sprintf("%s:%d", config.RedisKeyOfOpus, id)
-}
-
 func GenerateAuthorKey(id uint) string {
 	return fmt.Sprintf("%s:%d", config.RedisKeyOfAuthor, id)
 }
