@@ -1,10 +1,12 @@
 package rabbitmq
 
 var (
-	RMQLike     *RabbitMQ
-	RMQUnLike   *RabbitMQ
-	RMQFollow   *RabbitMQ
-	RMQUnFollow *RabbitMQ
+	RMQLike      *RabbitMQ
+	RMQUnLike    *RabbitMQ
+	RMQFollow    *RabbitMQ
+	RMQUnFollow  *RabbitMQ
+	RMQComment   *RabbitMQ
+	RMQUnComment *RabbitMQ
 )
 
 // InitRabbitMQ 初始化RabbitMQ
@@ -24,6 +26,12 @@ func InitRabbitMQ() {
 
 	RMQUnFollow = NewWorkRabbitMQ("unfollow")
 	go RMQUnFollow.Consume(UnFollow)
+
+	RMQComment = NewWorkRabbitMQ("comment")
+	go RMQComment.Consume(Comment)
+
+	RMQUnComment = NewWorkRabbitMQ("uncomment")
+	go RMQUnComment.Consume(UnComment)
 }
 
 // DestroyRabbitMQ 销毁RabbitMQ
@@ -32,4 +40,6 @@ func DestroyRabbitMQ() {
 	RMQUnLike.Destroy()
 	RMQFollow.Destroy()
 	RMQUnFollow.Destroy()
+	RMQComment.Destroy()
+	RMQUnComment.Destroy()
 }
