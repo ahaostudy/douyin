@@ -10,7 +10,7 @@ import (
 var (
 	StaticPath string
 
-	RedisKeyLock       = "mutex"
+	RedisKeyLock       = "lock"
 	RedisKeyTTL        = 24 * time.Hour
 	RedisKeyOfLike     = "like"
 	RedisKeyOfAuthor   = "author"

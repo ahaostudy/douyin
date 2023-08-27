@@ -36,7 +36,7 @@ func GetUserByID(id, curID uint) (*model.User, bool) {
 	}()
 
 	// 2. 获取 is_follow 字段
-	//    因为 is_follow 是一个用户相对于另一个用户的值，而不是某个用户绝对的值，所以需要试试获取
+	//    因为 is_follow 是一个用户相对于另一个用户的值，而不是某个用户绝对的值，所以需要实时获取
 	go func() {
 		defer wg.Done()
 		f, ok := IsFollow(curID, id)
