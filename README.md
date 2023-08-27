@@ -1,6 +1,6 @@
 # 字节青训营 —— 抖音极简版
 
-<img src="./public/icon/img.png" style="max-height: 400px;">
+<img src="public/image/img.png" style="max-height: 400px;">
 
 ## 目录
 
