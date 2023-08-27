@@ -49,24 +49,25 @@ func follow(uid, tid uint) bool {
 
 	// 维护用户信息
 	go func() {
+		ctx, cancel := redis.WithTimeoutContextBySecond(2)
+		defer cancel()
+
 		// 更新关注数，如果更新失败则删除key，保证数据一致
-		if !ExistsUserInfo(ctx, uid) {
-			return
-		}
-		key := redis.GenerateUserKey(uid)
-		if redis.RdbUser.HIncrBy(ctx, key, "follow_count", 1).Err() != nil {
-			redis.RdbUser.Del(ctx, key)
-			return
+		if ExistsUserInfo(ctx, uid) {
+			key := redis.GenerateUserKey(uid)
+			if redis.RdbUser.HIncrBy(ctx, key, "follow_count", 1).Err() != nil {
+				redis.RdbUser.Del(ctx, key)
+				return
+			}
 		}
 
 		// 更新粉丝数
-		if !ExistsUserInfo(ctx, tid) {
-			return
-		}
-		key = redis.GenerateUserKey(tid)
-		if redis.RdbUser.HIncrBy(ctx, key, "follower_count", 1).Err() != nil {
-			redis.RdbUser.Del(ctx, key)
-			return
+		if ExistsUserInfo(ctx, tid) {
+			key := redis.GenerateUserKey(tid)
+			if redis.RdbUser.HIncrBy(ctx, key, "follower_count", 1).Err() != nil {
+				redis.RdbUser.Del(ctx, key)
+				return
+			}
 		}
 	}()
 
@@ -98,22 +99,23 @@ func unFollow(uid, tid uint) bool {
 	}
 
 	go func() {
-		if !ExistsUserInfo(ctx, uid) {
-			return
-		}
-		key := redis.GenerateUserKey(uid)
-		if redis.RdbUser.HIncrBy(ctx, key, "follow_count", -1).Err() != nil {
-			redis.RdbUser.Del(ctx, key)
-			return
+		ctx, cancel := redis.WithTimeoutContextBySecond(2)
+		defer cancel()
+
+		if ExistsUserInfo(ctx, uid) {
+			key := redis.GenerateUserKey(uid)
+			if redis.RdbUser.HIncrBy(ctx, key, "follow_count", -1).Err() != nil {
+				redis.RdbUser.Del(ctx, key)
+				return
+			}
 		}
 
-		if !ExistsUserInfo(ctx, tid) {
-			return
-		}
-		key = redis.GenerateUserKey(tid)
-		if redis.RdbUser.HIncrBy(ctx, key, "follower_count", -1).Err() != nil {
-			redis.RdbUser.Del(ctx, key)
-			return
+		if ExistsUserInfo(ctx, tid) {
+			key := redis.GenerateUserKey(tid)
+			if redis.RdbUser.HIncrBy(ctx, key, "follower_count", -1).Err() != nil {
+				redis.RdbUser.Del(ctx, key)
+				return
+			}
 		}
 	}()
 

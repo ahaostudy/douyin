@@ -45,16 +45,18 @@ func like(uid, vid uint) bool {
 
 	// 4. 维护用户信息中的喜欢数和获赞数
 	go func() {
+		ctx, cancel := redis.WithTimeoutContextBySecond(2)
+		defer cancel()
+
 		// 维护喜欢数
 		// 判断redis是否有该用户信息缓存，无缓存时不需要更新
-		if !ExistsUserInfo(ctx, uid) {
-			return
-		}
-		key := redis.GenerateUserKey(uid)
-		// 喜欢数+1，如果更新失败则删除key，保证数据一致
-		if err := redis.RdbUser.HIncrBy(ctx, key, "favorite_count", 1).Err(); err != nil {
-			redis.RdbUser.Del(ctx, key)
-			return
+		if ExistsUserInfo(ctx, uid) {
+			key := redis.GenerateUserKey(uid)
+			// 喜欢数+1，如果更新失败则删除key，保证数据一致
+			if err := redis.RdbUser.HIncrBy(ctx, key, "favorite_count", 1).Err(); err != nil {
+				redis.RdbUser.Del(ctx, key)
+				return
+			}
 		}
 
 		// 维护获赞数
@@ -93,15 +95,21 @@ func unLike(uid, vid uint) bool {
 	}
 
 	go func() {
-		key := redis.GenerateUserKey(uid)
-		if !ExistsUserInfo(ctx, uid) {
-			return
-		}
-		if err := redis.RdbUser.HIncrBy(ctx, key, "favorite_count", -1).Err(); err != nil {
-			redis.RdbUser.Del(ctx, key)
-			return
+		ctx, cancel := redis.WithTimeoutContextBySecond(2)
+		defer cancel()
+
+		// 维护喜欢数
+		// 判断redis是否有该用户信息缓存，无缓存时不需要更新
+		if ExistsUserInfo(ctx, uid) {
+			key := redis.GenerateUserKey(uid)
+			// 喜欢数+1，如果更新失败则删除key，保证数据一致
+			if err := redis.RdbUser.HIncrBy(ctx, key, "favorite_count", -1).Err(); err != nil {
+				redis.RdbUser.Del(ctx, key)
+				return
+			}
 		}
 
+		// 维护获赞数
 		authorID, err := GetAuthorID(ctx, vid)
 		if err != nil || !ExistsUserInfo(ctx, authorID) {
 			return

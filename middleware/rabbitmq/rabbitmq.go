@@ -21,8 +21,6 @@ func initConn() {
 		viper.GetString("rabbitmq.vhost"),
 	)
 
-	fmt.Println(mqUrl)
-
 	var err error
 	conn, err = amqp.Dial(mqUrl)
 	if err != nil {
@@ -80,16 +78,12 @@ func (r *RabbitMQ) Publish(message []byte) error {
 	}
 
 	// 调用 channel 发送消息到队列
-	err = r.channel.Publish(r.Exchange, r.Key, false, false,
+	return r.channel.Publish(r.Exchange, r.Key, false, false,
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        message,
 		},
 	)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // Consume 消费者

@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 )
 
-// 抽取指定路径下的视频画面帧作为视频封面图，保存到指定路径下
+// ExtractThumbnail 抽取指定路径下的视频画面帧作为视频封面图，保存到指定路径下
 func ExtractThumbnail(videoPath, thumbnailRoot string) error {
 	// 检查图片文件是否存在，不存在即创建
 	// ffmpeg不支持写入结果到原本不存在的文件
-	CreateCoverFile(thumbnailRoot)
+	_ = CreateCoverFile(thumbnailRoot)
 
 	// 抽取帧的时间点,第一帧
 	frameTime := "00:00:00.0"
