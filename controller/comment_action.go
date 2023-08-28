@@ -25,6 +25,7 @@ func CommentAction(c *gin.Context) {
 		// 发送评论
 		commentText := c.Query("comment_text")
 
+
 		comment, ok := service.SendComment(uid, vid, commentText)
 		if !ok {
 			c.JSON(http.StatusOK, CommentActionResponse{
