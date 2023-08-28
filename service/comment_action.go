@@ -2,29 +2,28 @@ package service
 
 import (
 	"main/dao"
+	"main/middleware/redis"
 	"main/model"
+	"strconv"
 )
 
 // SendComment 发送评论
 func SendComment(uid uint, vid uint, commentText string) (*model.Comment, bool) {
-	// 先将当前视频的所有评论都加载到redis中
-	if _, flag := GetCommentList(vid, uid);flag == false{
-		return nil, false
-	}
-
-	if()
-
 	// 插入一条评论记录
 	cid, err := dao.InsertComment(uid, vid, commentText)
 	if err != nil {
 		return nil, false
 	}
 
-	// 新数据要先判断在redis中有没有对应的视频vid的记录
-	// 直接将数据库最新的这个视频vid的所有评论都查询出来重新加入redis中
-	// 两种情况：1. redis原本没有这个key；2. redis有这个key，那就更新
-	// 更新redis中对应的视频 评论列表
-	GetCommentList(vid, uid)
+	go func() {
+		// 并发更新redis中的对应视频vid的list
+		ctx, cancel := redis.WithTimeoutContextBySecond(300)
+		defer cancel()
+		key := redis.GenerateCommentKey(vid)
+		if err := updateRedisComments(ctx, key, vid, uid); err != nil {
+			return
+		}
+	}()
 
 	// 获取评论的详细数据
 	comment, err := dao.GetComment(cid, uid)
@@ -41,6 +40,28 @@ func DeleteComment(commentID uint, uid uint) bool {
 	if err != nil || comment.UserID != uid {
 		return false
 	}
+	vid := comment.VideoID
+
+	// if err := rabbitmq.RMQUnLike.Publish(rabbitmq.GenerateUnLikeMQParam(uid, vid)); err != nil {
+	// 	redis.RdbLike.SAdd(ctx, key, uid)
+	// 	return false
+	// }
+
+	go func() {
+		// 并发更新redis中的对应视频vid的list
+		key := redis.GenerateCommentKey(vid)
+		ctx, cancel := redis.WithTimeoutContextBySecond(300)
+		defer cancel()
+
+		if LoadCommentList(ctx, vid, uid) != nil {
+			return
+		}
+
+		if err := redis.RdbComment.HDel(ctx, key, strconv.Itoa(int(commentID))).Err(); err != nil {
+			return
+		}
+	}()
+
 	// 删除评论
 	return dao.DeleteComment(commentID) == nil
 }

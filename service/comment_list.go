@@ -66,62 +66,61 @@ func LoadCommentList(ctx context.Context, vid, uid uint) error {
 
 	// 判断redis里是否存在该视频的评论列表，不存在时从MySQL读取到Redis
 	if n, err := redis.RdbComment.Exists(ctx, key).Result(); n == 0 || err != nil {
-		// 从数据库读取数据
-		commentList, err := dao.GetCommentList(vid, uid)
-		if err != nil {
-			return err
-		}
-
-		// 先添加一个默认值，防止缓存穿透
-		if err := redis.RdbComment.HSet(ctx, key, config.RedisValueOfNULL, config.RedisValueOfNULL).Err(); err != nil {
-			return err
-		}
-
-		// 并发写入redis
-		wg := sync.WaitGroup{}
-		for _, comment := range commentList {
-			wg.Add(1)
-			go func(comment model.Comment) {
-				defer wg.Done()
-				commentJson, err1 := json.Marshal(comment)
-				if err != nil {
-					err = err1
-				}
-				if e := redis.RdbComment.HSet(ctx, key, comment.ID, commentJson).Err(); e != nil {
-					err = e
-				}
-			}(*comment)
-		}
-		wg.Wait()
-		// for _, comment := range commentList {
-		// 	commentJson, err1 := json.Marshal(comment)
-		// 	if err != nil {
-		// 		err = err1
-		// 	}
-		// 	if e := redis.RdbComment.HSet(ctx, key, comment.ID, commentJson).Err(); e != nil {
-		// 		err = e
-		// 	}
-		// }
-
-		// 清除占位防止缓存穿透的NULL key
-		existNULL, err := redis.RdbComment.HExists(ctx, key, config.RedisValueOfNULL).Result()
-		if err != nil {
-			return err
-		}
-
-		if existNULL {
-			err := redis.RdbComment.HDel(ctx, key, config.RedisValueOfNULL).Err()
-			if err != nil {
-				return err
-			}
-		}
-
-		// 如果过程中读取失败，直接将key删除，防止脏写
-		if err != nil {
-			redis.RdbComment.Del(ctx, key)
+		if err := updateRedisComments(ctx, key, vid, uid); err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+// 从MySQL中查询当前视频vid对应的所有评论信息，更新到Redis中
+func updateRedisComments(ctx context.Context, key string, vid, uid uint) error {
+	// 从数据库读取数据
+	commentList, err := dao.GetCommentList(vid, uid)
+	if err != nil {
+		return err
+	}
+
+	// 先添加一个默认值，防止缓存穿透
+	if err := redis.RdbComment.HSet(ctx, key, config.RedisValueOfNULL, config.RedisValueOfNULL).Err(); err != nil {
+		return err
+	}
+
+	// 并发写入redis
+	wg := sync.WaitGroup{}
+	for _, comment := range commentList {
+		wg.Add(1)
+		go func(comment model.Comment) {
+			defer wg.Done()
+			commentJson, err1 := json.Marshal(comment)
+			if err != nil {
+				err = err1
+			}
+			if e := redis.RdbComment.HSet(ctx, key, comment.ID, commentJson).Err(); e != nil {
+				err = e
+			}
+		}(*comment)
+	}
+	wg.Wait()
+
+	// 清除占位防止缓存穿透的NULL key
+	existNULL, err := redis.RdbComment.HExists(ctx, key, config.RedisValueOfNULL).Result()
+	if err != nil {
+		return err
+	}
+
+	if existNULL {
+		err := redis.RdbComment.HDel(ctx, key, config.RedisValueOfNULL).Err()
+		if err != nil {
+			return err
+		}
+	}
+
+	// 如果过程中读取失败，直接将key删除，防止脏写
+	if err != nil {
+		redis.RdbComment.Del(ctx, key)
+		return err
+	}
 	return nil
 }

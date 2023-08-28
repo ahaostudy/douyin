@@ -15,7 +15,8 @@ func DeleteComment(commentID uint) error {
 }
 
 func GetCommentBasicInfo(id uint) (*model.Comment, error) {
-	var comment *model.Comment
+	comment := &model.Comment{} // 创建 Comment 结构体的实例
+
 	err := DB.First(comment, id).Error
 	return comment, err
 }
