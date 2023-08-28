@@ -37,3 +37,8 @@ func GenerateMessageKey(aid, bid uint) (string, string) {
 	maxKey := fmt.Sprintf("%s:%d", config.RedisKeyOfMessage, maxID)
 	return minKey, maxKey
 }
+
+// 评论是依赖于视频的，所以这里redis 主key是视频vid，副key是视频的各个评论的
+func GenerateCommentKey(vid uint) string {
+	return fmt.Sprintf("%s:%d", config.RedisKeyOfComment, vid)
+}

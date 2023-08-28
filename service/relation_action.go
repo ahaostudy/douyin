@@ -20,7 +20,7 @@ func RelationAction(uid, tid uint, t int) bool {
 
 // 关注
 func follow(uid, tid uint) bool {
-	ctx, cancel := redis.WithTimeoutContextBySecond(2)
+	ctx, cancel := redis.WithTimeoutContextBySecond(300)
 	defer cancel()
 
 	// 加载关注和粉丝列表到redis
@@ -41,6 +41,7 @@ func follow(uid, tid uint) bool {
 	}
 
 	// 异步更新数据库
+	// TODO：本地测试先注释掉涉及MQ的部分
 	if rabbitmq.RMQFollow.Publish(rabbitmq.GenerateFollowMQParam(uid, tid)) != nil {
 		redis.RdbFollow.SRem(ctx, fk, tid)
 		redis.RdbFollow.SRem(ctx, fek, uid)

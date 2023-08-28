@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"main/middleware/rabbitmq"
 	"main/middleware/redis"
 )
@@ -42,6 +43,9 @@ func like(uid, vid uint) bool {
 		redis.RdbLike.SRem(ctx, key, uid)
 		return false
 	}
+	fmt.Println("favorite async to mysql success")
+
+	redis.RdbLike.SRem(ctx, key, uid)
 
 	// 4. 维护用户信息中的喜欢数和获赞数
 	go func() {

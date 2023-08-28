@@ -1,9 +1,10 @@
 package dao
 
 import (
-	"gorm.io/gorm"
 	"main/model"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func DeleteComment(commentID uint) error {
@@ -67,7 +68,7 @@ func GetCommentList(vid uint, uid uint) ([]*model.Comment, error) {
 	}).
 		Select("comments.*").
 		Where("comments.video_id", vid).
-		Order("comments.created_at").
+		Order("comments.created_at DESC").
 		Find(&commentList).Error
 
 	return commentList, err

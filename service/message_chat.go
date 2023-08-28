@@ -2,13 +2,14 @@ package service
 
 import (
 	"fmt"
-	"gorm.io/gorm"
 	"main/config"
 	"main/dao"
 	"main/middleware/redis"
 	"main/model"
 	"strconv"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // GetMessageList 获取消息列表
@@ -16,7 +17,7 @@ func GetMessageList(userID, toUserID uint, preMsgTime time.Time) ([]*model.Messa
 	var messageList []*model.Message
 	minKey, maxKey := redis.GenerateMessageKey(userID, toUserID)
 
-	ctx, cancel := redis.WithTimeoutContextBySecond(3)
+	ctx, cancel := redis.WithTimeoutContextBySecond(300)
 	defer cancel()
 
 	// 0. 处理前端bug
