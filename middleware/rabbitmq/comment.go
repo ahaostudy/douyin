@@ -23,7 +23,7 @@ func GenerateCommentMQParam(uid, vid uint, commentText string) []byte {
 // Comment 插入评论
 func Comment(msg *amqp.Delivery) error {
 	// 解析参数
-	params := strings.Split(string(msg.Body), " ")
+	params := strings.SplitN(string(msg.Body), " ", 3)
 	_uid, err := strconv.ParseUint(params[0], 10, 32)
 	if err != nil {
 		return err
