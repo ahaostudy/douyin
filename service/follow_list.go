@@ -17,7 +17,7 @@ type FollowPair struct {
 
 // GetFollowList 获取关注列表
 func GetFollowList(id, curID uint) ([]*model.User, bool) {
-	ctx, cancel := redis.WithTimeoutContextBySecond(300)
+	ctx, cancel := redis.WithTimeoutContextBySecond(3)
 	defer cancel()
 	key := redis.GenerateFollowKey(id)
 

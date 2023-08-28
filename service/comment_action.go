@@ -17,7 +17,7 @@ func SendComment(uid uint, vid uint, commentText string) (*model.Comment, bool) 
 
 	go func() {
 		// 并发更新redis中的对应视频vid的list
-		ctx, cancel := redis.WithTimeoutContextBySecond(300)
+		ctx, cancel := redis.WithTimeoutContextBySecond(3)
 		defer cancel()
 		key := redis.GenerateCommentKey(vid)
 		if err := updateRedisComments(ctx, key, vid, uid); err != nil {
@@ -50,7 +50,7 @@ func DeleteComment(commentID uint, uid uint) bool {
 	go func() {
 		// 并发更新redis中的对应视频vid的list
 		key := redis.GenerateCommentKey(vid)
-		ctx, cancel := redis.WithTimeoutContextBySecond(300)
+		ctx, cancel := redis.WithTimeoutContextBySecond(3)
 		defer cancel()
 
 		if LoadCommentList(ctx, vid, uid) != nil {

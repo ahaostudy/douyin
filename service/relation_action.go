@@ -20,7 +20,7 @@ func RelationAction(uid, tid uint, t int) bool {
 
 // 关注
 func follow(uid, tid uint) bool {
-	ctx, cancel := redis.WithTimeoutContextBySecond(300)
+	ctx, cancel := redis.WithTimeoutContextBySecond(3)
 	defer cancel()
 
 	// 加载关注和粉丝列表到redis

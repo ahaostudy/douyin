@@ -18,7 +18,7 @@ func GetCommentList(vid uint, uid uint) ([]*model.Comment, bool) {
 	var commentList []*model.Comment
 	// var err error
 	// 先从redis中加载相关的视频评论信息
-	ctx, cancel := redis.WithTimeoutContextBySecond(300)
+	ctx, cancel := redis.WithTimeoutContextBySecond(3)
 	defer cancel()
 	key := redis.GenerateCommentKey(vid)
 
