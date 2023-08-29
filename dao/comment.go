@@ -42,15 +42,15 @@ func GetComment(cid, uid uint) (*model.Comment, error) {
 	return comment, err
 }
 
-func InsertComment(uid uint, vid uint, commentText string) (uint, error) {
-	comment := model.Comment{
+func InsertComment(uid uint, vid uint, commentText string) (*model.Comment, error) {
+	comment := &model.Comment{
 		UserID:      uid,
 		VideoID:     vid,
 		CommentText: commentText,
 		CreatedAt:   time.Now(),
 	}
-	err := DB.Create(&comment).Error
-	return comment.ID, err
+	err := DB.Create(comment).Error
+	return comment, err
 }
 
 func GetCommentList(vid uint, uid uint) ([]*model.Comment, error) {

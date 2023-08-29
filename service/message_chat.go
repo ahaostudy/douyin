@@ -17,7 +17,7 @@ func GetMessageList(userID, toUserID uint, preMsgTime time.Time) ([]*model.Messa
 	var messageList []*model.Message
 	minKey, maxKey := redis.GenerateMessageKey(userID, toUserID)
 
-	ctx, cancel := redis.WithTimeoutContextBySecond(300)
+	ctx, cancel := redis.WithTimeoutContextBySecond(3)
 	defer cancel()
 
 	// 0. 处理前端bug

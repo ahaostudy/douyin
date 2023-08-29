@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"main/dao"
 	"main/middleware/redis"
 	"main/model"
@@ -10,26 +11,64 @@ import (
 // SendComment 发送评论
 func SendComment(uid uint, vid uint, commentText string) (*model.Comment, bool) {
 	// 插入一条评论记录
-	cid, err := dao.InsertComment(uid, vid, commentText)
+	comment, err := dao.InsertComment(uid, vid, commentText)
 	if err != nil {
 		return nil, false
 	}
+	key := redis.GenerateCommentKey(vid)
 
+	// 这里的user要实时查询最新的信息（因为关注、粉丝等信息是会动态更新的）
+	user, ok := GetUserByID(comment.UserID, uid)
+	// 这里获取用户失败，但是不影响新增评论的操作，所以只需要从redis中把数据删除即可
+	if !ok {
+		go func() {
+			ctx, cancel := redis.WithTimeoutContextBySecond(3)
+			defer cancel()
+			redis.RdbComment.Del(ctx, key)
+		}()
+		return comment, true
+	}
+	// 如果user返回成功，将对应User的最新信息（关注、粉丝等）同步到评论中
+	comment.User = *user
+	// 创建一个用于接收error的通道
+	errCh := make(chan error)
+	// 并发更新redis中的对应视频vid的list
+	ctx, cancel := redis.WithTimeoutContextBySecond(3)
+	defer cancel()
 	go func() {
-		// 并发更新redis中的对应视频vid的list
-		ctx, cancel := redis.WithTimeoutContextBySecond(3)
-		defer cancel()
-		key := redis.GenerateCommentKey(vid)
-		if err := updateRedisComments(ctx, key, vid, uid); err != nil {
+
+		// 如果redis中已经有相关的key value，直接更新
+		// 如果没有，则需要从数据库中加载
+		if n, err := redis.RdbComment.Exists(ctx, key).Result(); n == 0 && err == nil {
+			if _, err := updateRedisComments(ctx, key, vid, uid); err != nil {
+				errCh <- err // 发送错误信息到通道
+				return
+			}
+		} else if err != nil {
+			errCh <- err // 发送错误信息到通道
 			return
 		}
+		// 以下过程如果出现失败情况，都要把当前redis的对应视频评论数据清空，避免出现读取错误数据的情况
+		commentJson, err := json.Marshal(comment)
+		if err != nil {
+			errCh <- err // 发送错误信息到通道
+			return
+		}
+		if err := redis.RdbComment.HSet(ctx, key, comment.ID, commentJson).Err(); err != nil {
+			errCh <- err // 发送错误信息到通道
+			return
+		}
+
+		errCh <- nil // 发送nil表示没有错误
 	}()
 
-	// 获取评论的详细数据
-	comment, err := dao.GetComment(cid, uid)
+	// 如果更新redis失败，直接删除这个视频vid对应的hash结构
+	err = <-errCh
 	if err != nil {
-		return nil, false
+		redis.RdbComment.Del(ctx, key)
+		return comment, true
 	}
+
 	return comment, true
 }
 
@@ -49,15 +88,21 @@ func DeleteComment(commentID uint, uid uint) bool {
 
 	go func() {
 		// 并发更新redis中的对应视频vid的list
-		key := redis.GenerateCommentKey(vid)
 		ctx, cancel := redis.WithTimeoutContextBySecond(3)
 		defer cancel()
-
-		if LoadCommentList(ctx, vid, uid) != nil {
+		key := redis.GenerateCommentKey(vid)
+		// 如果redis中已经有相关的key value，直接更新
+		// 如果没有，则需要从数据库中加载
+		if n, err := redis.RdbComment.Exists(ctx, key).Result(); n == 0 && err == nil {
+			if _, err := updateRedisComments(ctx, key, vid, uid); err != nil {
+				return
+			}
+		} else if err != nil {
 			return
 		}
-
+		// 如果要删除的数据同步到redis中执行删除失败，直接把当前视频的缓存清空，避免读取错误数据
 		if err := redis.RdbComment.HDel(ctx, key, strconv.Itoa(int(commentID))).Err(); err != nil {
+			redis.RdbComment.Del(ctx, key)
 			return
 		}
 	}()
