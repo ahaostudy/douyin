@@ -158,28 +158,28 @@ func updateRedisComments(ctx context.Context, key string, vid, uid uint) ([]*mod
 	if err = redis.RdbComment.HSet(ctx, key, config.RedisValueOfNULL, config.RedisValueOfNULL).Err(); err == nil {
 		// 并发写入redis
 		wg := sync.WaitGroup{}
-		errcCh := make(chan error)
+		errCh := make(chan error)
 		for _, comment := range commentList {
 			wg.Add(1)
 			go func(comment model.Comment) {
 				defer wg.Done()
 				commentJson, err := json.Marshal(comment)
 				if err != nil {
-					errcCh <- err
+					errCh <- err
 					return
 				}
 				if e := redis.RdbComment.HSet(ctx, key, comment.ID, commentJson).Err(); e != nil {
-					errcCh <- e
+					errCh <- e
 					return
 				}
 			}(*comment)
 		}
 		wg.Wait()
 
-		close(errcCh)
+		close(errCh)
 
 		//  处理并发过程中产生的错误
-		if len(errcCh) > 0 {
+		if len(errCh) > 0 {
 			redis.RdbComment.Del(ctx, key)
 			return commentList, nil
 		}

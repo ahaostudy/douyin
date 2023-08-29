@@ -13,7 +13,7 @@ import (
 
 // GetUserByID 通过ID获取用户
 // id 目标用户ID
-// tid 当前登录的用户ID
+// curID 当前登录的用户ID
 func GetUserByID(id, curID uint) (*model.User, bool) {
 	ctx, cancel := redis.WithTimeoutContextBySecond(3)
 	defer cancel()
