@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"main/service"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 type MessageActionResponse struct {
@@ -14,7 +12,6 @@ type MessageActionResponse struct {
 }
 
 func MessageAction(c *gin.Context) {
-	fmt.Println(time.Now().UnixMilli())
 	// 解析请求参数
 	userID := c.GetUint("user_id")
 	tui, _ := strconv.ParseUint(c.Query("to_user_id"), 10, 32)

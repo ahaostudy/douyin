@@ -5,6 +5,7 @@ import (
 	"main/dao"
 	"main/middleware/redis"
 	"main/model"
+	"strconv"
 	"time"
 )
 
@@ -22,20 +23,42 @@ func sentMessage(fromID, toID uint, content string) bool {
 		return false
 	}
 
-	minKey, maxKey := redis.GenerateMessageKey(fromID, toID)
-
-	ctx, cancel := redis.WithTimeoutContextBySecond(2)
-	defer cancel()
-
-	// 更新redis缓存的最新消息时间
+	// 并发更新redis缓存的最新消息时间
 	// 更新失败时删除该缓存，保证数据一致性
 	// 使用乐观锁，防止新消息更新到redis的速度比旧消息快，造成旧消息的时间覆盖新消息
-	lockKey := generateLockKey(minKey, maxKey)
-	lockID, err := redis.Lock(redis.RdbMessage, lockKey)
-	defer redis.Unlock(redis.RdbMessage, lockKey, lockID)
-	if err := redis.RdbMessage.HSet(ctx, minKey, maxKey, message.CreatedAt.UnixMilli()).Err(); err != nil {
-		redis.RdbMessage.HDel(ctx, minKey, maxKey)
-	}
+	go func() {
+		minKey, maxKey := redis.GenerateMessageKey(fromID, toID)
+
+		ctx, cancel := redis.WithTimeoutContextBySecond(2)
+		defer cancel()
+
+		// 获取乐观锁，保证并发安全
+		lockKey := generateLockKey(minKey, maxKey)
+		lockID, err := redis.Lock(redis.RdbMessage, lockKey)
+		defer redis.Unlock(redis.RdbMessage, lockKey, lockID)
+		if err != nil {
+			redis.RdbMessage.HDel(ctx, minKey, maxKey)
+			return
+		}
+
+		// 获取缓存中的时间戳，判断该时间戳与将要写入的时间戳哪个更新
+		cacheStampStr, err := redis.RdbMessage.HGet(ctx, minKey, maxKey).Result()
+		if err != nil || len(cacheStampStr) == 0 {
+			return
+		}
+		cacheStamp, err := strconv.ParseInt(cacheStampStr, 10, 64)
+		if err != nil {
+			redis.RdbMessage.HDel(ctx, minKey, maxKey)
+			return
+		}
+
+		// 如果缓存的时间戳在将要写入的时间戳之前，则更新时间戳
+		if time.UnixMilli(cacheStamp).Before(message.CreatedAt) {
+			if err := redis.RdbMessage.HSet(ctx, minKey, maxKey, message.CreatedAt.UnixMilli()).Err(); err != nil {
+				redis.RdbMessage.HDel(ctx, minKey, maxKey)
+			}
+		}
+	}()
 
 	return true
 }
@@ -77,8 +100,27 @@ func SendMessage(fromID, toID uint, content string) bool {
 		lockKey := generateLockKey(minKey, maxKey)
 		lockID, err := redis.Lock(redis.RdbMessage, lockKey)
 		defer redis.Unlock(redis.RdbMessage, lockKey, lockID)
-		if err := redis.RdbMessage.HSet(ctx, minKey, maxKey, message.CreatedAt.UnixMilli()).Err(); err != nil {
+		if err != nil {
 			redis.RdbMessage.HDel(ctx, minKey, maxKey)
+			return
+		}
+
+		// 获取缓存中的时间戳，判断该时间戳与将要写入的时间戳哪个更新
+		cacheStampStr, err := redis.RdbMessage.HGet(ctx, minKey, maxKey).Result()
+		if err != nil || len(cacheStampStr) == 0 {
+			return
+		}
+		cacheStamp, err := strconv.ParseInt(cacheStampStr, 10, 64)
+		if err != nil {
+			redis.RdbMessage.HDel(ctx, minKey, maxKey)
+			return
+		}
+
+		// 如果缓存的时间戳在将要写入的时间戳之前，则更新时间戳
+		if time.UnixMilli(cacheStamp).Before(message.CreatedAt) {
+			if err := redis.RdbMessage.HSet(ctx, minKey, maxKey, message.CreatedAt.UnixMilli()).Err(); err != nil {
+				redis.RdbMessage.HDel(ctx, minKey, maxKey)
+			}
 		}
 	}()
 
